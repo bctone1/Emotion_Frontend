@@ -1,24 +1,29 @@
-import logo from './logo.svg';
-import './App.css';
+import Header from "./components/header";
+import Footer from "./components/footer";
+import Puzzle from "./components/puzzle ";
+import Section from "./components/section1";
+import "../src/index.css"
+
+import { useState } from 'react';
 
 function App() {
+  const [PuzzleStatus, setPuzzleStatus] = useState(1);
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+
+    <>
+      <div className="container">
+        <Header />
+
+        <div class="main-puzzle-container">
+          <Puzzle PuzzleStatus={PuzzleStatus} />
+          <Section PuzzleStatus={PuzzleStatus} setPuzzleStatus={setPuzzleStatus} />
+        </div>
+
+      </div>
+
+      <Footer />
+    </>
+
   );
 }
 
