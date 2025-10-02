@@ -1,12 +1,38 @@
-export default function Header() {
+import { useEffect, useState } from "react";
+
+
+
+export default function Header({ user }) {
+
+    const [elapsedTime, setElapsedTime] = useState("00:00");
+
+    useEffect(() => {
+        if (!user.startTime) return; // startTime이 없으면 실행 X
+
+        const start = new Date(user.startTime);
+
+        const interval = setInterval(() => {
+            const now = new Date();
+            const diff = Math.floor((now - start) / 1000); // 초 단위 차이
+
+            const minutes = String(Math.floor(diff / 60)).padStart(2, "0");
+            const seconds = String(diff % 60).padStart(2, "0");
+
+            setElapsedTime(`${minutes}:${seconds}`);
+        }, 1000);
+
+        return () => clearInterval(interval); // 언마운트 시 정리
+    }, [user.startTime]);
+
     return (
         <>
             <div className="header">
                 {/* Emotion Care 타이틀 */}
-                <h1 className="emotion-care-title">
+                <img src="/이모션 로고-Photoroom.png" alt="Emotion Care 로고" style={{ height: "250px" }} />
+                {/* <h1 className="emotion-care-title">
                     <span className="emotion-bold">Emotion</span>{" "}
                     <span className="Care-regular">Care</span>
-                </h1>
+                </h1> */}
                 <p style={{ fontSize: "1.3em", opacity: 0.9 }}>
                     단계별로 완성하며 감정의 변화를 확인해보세요!
                 </p>
@@ -59,7 +85,7 @@ export default function Header() {
                                 textShadow: "0 2px 4px rgba(0,0,0,0.3)",
                             }}
                         >
-                            사용자 #<span id="userNumber">1247</span>
+                            사용자 #<span id="userNumber">{user.randomNum}</span>
                         </span>
                         <span
                             style={{
@@ -77,9 +103,32 @@ export default function Header() {
                                     fontWeight: "bold",
                                 }}
                             >
-                                00:00
+                                {elapsedTime}
                             </span>
+
                         </span>
+
+                        <span
+                            style={{
+                                marginLeft: "30px",
+                                fontSize: "1.4em",
+                                fontWeight: 600,
+                                color: "#e5e7eb",
+                            }}
+                        >
+                            사용자 IP:{" "}
+                            <span
+                                id="sessionTime"
+                                style={{
+                                    color: "#fbbf24",
+                                    fontWeight: "bold",
+                                }}
+                            >
+                                {user.user_ip}
+                            </span>
+
+                        </span>
+
                     </div>
                     <div className="user-stats">
                         <div className="stat-item">
