@@ -98,7 +98,7 @@ function App() {
         <div className="main-puzzle-container">
           <Puzzle PuzzleStatus={PuzzleStatus} />
 
-          <Section PuzzleStatus={PuzzleStatus} setPuzzleStatus={setPuzzleStatus} setUser={setUser} />
+          <Section PuzzleStatus={PuzzleStatus} setPuzzleStatus={setPuzzleStatus} setUser={setUser} user={user}/>
         </div>
 
       </div>

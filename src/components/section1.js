@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import * as faceapi from "@vladmandic/face-api";
 
 
-export default function Section1({ PuzzleStatus, setPuzzleStatus ,setUser}) {
+export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user }) {
 
     const videoRef = useRef(null);
     const videoRef2 = useRef(null);
@@ -276,24 +276,8 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus ,setUser}) {
 
     const intervalRef = useRef(null);
 
-    // React 상태로 초기화
-    // const [metrics, setMetrics] = useState({
-    //     detectionAttempts: 0,
-    //     successfulDetections: 0,
-    //     analysisStartTime: performance.now(),
-    //     performanceMetrics: {
-    //         emotionDetectionAccuracy: 0,
-    //         emotionConfidence: 0,
-    //         faceDetectionRate: 0,
-    //         analysisProcessingTime: 0,
-    //         apiSuccessRate: 0
-    //     }
-    // });
-
-
     async function startEmotionDetection({ video, canvas }) {
-        console.log("감정 인식 시작");
-        // const canvas = canvasRef.current;
+
         const displaySize = { width: video.videoWidth, height: video.videoHeight };
         canvas.width = displaySize.width;
         canvas.height = displaySize.height;
@@ -354,14 +338,15 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus ,setUser}) {
                                 surprised: emotions.surprised,
                                 fearful: emotions.fearful,
                                 disgusted: emotions.disgusted,
-                                confused: emotions.confused || 0 // face-api에서 제공 안 하면 0
+                                confused: emotions.confused || 0
                             }
                         });
+
                     } else {
                         updateDetectionMetrics({ detectionSuccess: true, confidence: finalConfidence });
 
                         setSecondEmotionDisplay({
-                            ...firstEmotionDisplay,
+                            ...SecondEmotionDisplay,
                             currentEmotionEmoji: emotionEmojiMap(sorted[0][0]),
                             currentEmotionName: emotionLabelMap(sorted[0][0]),
                             confidence: confidence,
@@ -374,7 +359,7 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus ,setUser}) {
                                 surprised: emotions.surprised,
                                 fearful: emotions.fearful,
                                 disgusted: emotions.disgusted,
-                                confused: emotions.confused || 0 // face-api에서 제공 안 하면 0
+                                confused: emotions.confused || 0
                             }
                         });
                     }
@@ -445,8 +430,6 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus ,setUser}) {
     const measureFirstEmotion = (int) => {
         setfirstStatus(int);
         if (int === 1) return;
-
-
         // 상태 초기화 (optional)
         setFirstEmotionDisplay({
             ...firstEmotionDisplay,
@@ -458,9 +441,6 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus ,setUser}) {
         if (videoRef.current && modelsLoaded) {
             startEmotionDetection({ video: videoRef.current, canvas: canvasRef.current });
         }
-        // if (videoRef.current && modelsLoaded) {
-        //     startEmotionDetection({ video: videoRef.current, canvas: canvasRef.current });
-        // }
 
         setTimeout(() => {
             if (intervalRef.current) {
@@ -483,7 +463,7 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus ,setUser}) {
 
         // 상태 초기화 (optional)
         setSecondEmotionDisplay({
-            ...firstEmotionDisplay,
+            ...SecondEmotionDisplay,
             currentEmotionMessage: "측정 중...",
             currentEmotionEmoji: "😐",
             currentEmotionName: "감지 중..."
@@ -500,7 +480,7 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus ,setUser}) {
             }
 
             setSecondEmotionDisplay({
-                ...firstEmotionDisplay,
+                ...SecondEmotionDisplay,
                 currentEmotionMessage: "측정 완료!"
             });
 
@@ -558,6 +538,49 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus ,setUser}) {
         setFinalAnalysis(analysisMessage);
     }, [firstEmotionDisplay, SecondEmotionDisplay]);
 
+
+    const create_emotion_data = async (index) => {
+        try {
+            if (index === 3) {
+                const response = await fetch("http://localhost:5000/emotion_measurements/create_emotion_data", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        session_id: user.session_id,
+                        measurement_type: "primary",
+                        emotion_name: firstEmotionDisplay.currentEmotionName,
+                        confidence_score: firstEmotionDisplay.confidence,
+                        face_detection_success: true
+                    })
+                });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.message || "서버 에러");
+                console.log("생성된 데이터:", data.measurement_id);
+            } else {
+                const response = await fetch("http://localhost:5000/emotion_measurements/create_emotion_data", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        session_id: user.session_id,
+                        measurement_type: "secondary",
+                        emotion_name: SecondEmotionDisplay.currentEmotionName,
+                        confidence_score: SecondEmotionDisplay.confidence,
+                        face_detection_success: true
+                    })
+                });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.message || "서버 에러");
+                console.log("생성된 데이터:", data.measurement_id);
+            }
+
+
+
+
+
+        } catch (err) {
+            console.error("오류 발생:", err);
+        }
+    }
 
 
 
@@ -759,7 +782,10 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus ,setUser}) {
                         <button
                             className={`action-button primary-button ${firstStatus === 3 ? "" : "hidden"}`}
                             id="proceedToContentButton"
-                            onClick={() => setPuzzleStatus(3)}
+                            onClick={() => {
+                                setPuzzleStatus(3);
+                                create_emotion_data(3);
+                            }}
                         >
                             콘텐츠 감상하러 가기
                         </button>
@@ -1029,12 +1055,24 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus ,setUser}) {
                         >
                             측정 중지
                         </button>
+
+                        <button
+                            className={`action-button primary-button ${SecondStatus === 3 ? "" : "hidden"}`}
+                            id="proceedToContentButton"
+                            onClick={() => {
+                                setPuzzleStatus(5);
+                                create_emotion_data(1);
+                            }}
+                        >
+                            결과 확인
+                        </button>
+
                     </div>
                 </div>
             </div >
 
             {/* 최종 완성 및 통계 */}
-            < div className={`step-content ${PuzzleStatus === 4 && SecondStatus === 3 ? "active" : ""}`} id="finalResult" >
+            < div className={`step-content ${PuzzleStatus === 5 && SecondStatus === 3 ? "active" : ""}`} id="finalResult" >
                 <div style={{ textAlign: "center", marginBottom: "30px" }}>
                     <h2
                         style={{
