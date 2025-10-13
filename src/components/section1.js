@@ -177,10 +177,7 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user 
         }
     };
 
-
-    const [emotionMonitorVisible, setemotionMonitorVisible] = useState(true);
     const [actualContentVisible, setactualContentVisible] = useState(false);
-    const [stopMeasureVisible, setstopMeasureVisible] = useState(true);
 
     // 감정 → 라벨
     const emotionLabelMap = (emotion) => {
@@ -210,11 +207,9 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user 
         return emotionEmojiMapping[emotion] || "";
     };
 
-    // const [firstEmotionData, setfirstEmotionData] = useState({
-    //     name: "혼란",
-    // });
-    const [Videocontent, setVideocontent] = useState("");
 
+
+    const [Videocontent, setVideocontent] = useState("");
     const showContent = async (emotionName) => {
         setactualContentVisible(true)
         setVideocontent(actualEmotionContent[emotionName]);
@@ -253,9 +248,8 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user 
                 audio: false,
             });
             videoRef.current.srcObject = stream;
-            // videoRef.current.play();
             videoRef2.current.srcObject = stream;
-            // videoRef2.current.play();
+
             setPuzzleStatus(2);
             setTimeout(() => {
                 loadModels();
@@ -303,7 +297,6 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user 
     const intervalRef = useRef(null);
 
     async function startEmotionDetection({ video, canvas }) {
-
         const displaySize = { width: video.videoWidth, height: video.videoHeight };
         canvas.width = displaySize.width;
         canvas.height = displaySize.height;
@@ -948,8 +941,6 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user 
                                 muted
                                 controls={false}
                                 ref={contentVideoRef}
-                            // onClick={() => videoRef.current.paused && handleManualPlay()}
-                            // style={{ width: '100%', display: loading ? 'none' : 'block' }}
                             />
                         </div>
 
