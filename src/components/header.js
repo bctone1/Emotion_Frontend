@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 
 
 
-export default function Header({ user }) {
+export default function Header({ user, total }) {
 
     const [elapsedTime, setElapsedTime] = useState("00:00");
 
@@ -133,19 +133,19 @@ export default function Header({ user }) {
                     <div className="user-stats">
                         <div className="stat-item">
                             <div className="stat-value" id="totalUsers">
-                                1,247
+                                {total.total_users}
                             </div>
                             <div className="stat-label">총 사용자</div>
                         </div>
                         <div className="stat-item">
                             <div className="stat-value" id="todayMeasurements">
-                                89
+                                {total.today_measurements}
                             </div>
                             <div className="stat-label">오늘 측정</div>
                         </div>
                         <div className="stat-item">
                             <div className="stat-value" id="myMeasurements">
-                                1
+                                {total.my_measurements}
                             </div>
                             <div className="stat-label">내 측정 횟수</div>
                         </div>

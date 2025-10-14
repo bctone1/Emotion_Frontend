@@ -11,8 +11,9 @@ function App() {
 
   const [total, settotal] = useState({
     total_users: null,
-    today_users: null,
-    my_count: null
+    today_measurements: null,
+    my_measurements: null,
+    user_id: null
   });
 
   const [user, setUser] = useState({
@@ -24,9 +25,24 @@ function App() {
 
   const hasRun = useRef(false);
 
-  const fetch_total = () => {
+  const fetch_stats = async (client_ip) => {
+    try {
+      const response = await fetch(
+        `${process.env.REACT_APP_API_URL}/session/stats?client_ip=${client_ip}`,
+        {
+          method: "GET",
+        }
+      );
 
-  }
+      const data = await response.json();
+      settotal(data);
+      console.log("stats :", data);
+    } catch (err) {
+      console.error("서버 요청 오류:", err);
+    }
+  };
+
+
 
   const createSession = async (user_number, user_ip, startTime) => {
     try {
@@ -83,6 +99,7 @@ function App() {
 
         // 3) 세션 생성 API 호출
         createSession(randomNum, ip, startTime);
+        fetch_stats(ip);
       })
       .catch((err) => console.error("IP 가져오기 실패:", err));
   }, []);
@@ -93,12 +110,12 @@ function App() {
 
     <>
       <div className="container">
-        <Header user={user} />
+        <Header user={user} total={total} />
 
         <div className="main-puzzle-container">
           <Puzzle PuzzleStatus={PuzzleStatus} />
 
-          <Section PuzzleStatus={PuzzleStatus} setPuzzleStatus={setPuzzleStatus} setUser={setUser} user={user}/>
+          <Section PuzzleStatus={PuzzleStatus} setPuzzleStatus={setPuzzleStatus} setUser={setUser} user={user} />
         </div>
 
       </div>
