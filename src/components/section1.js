@@ -1421,31 +1421,31 @@ function updateKPIDisplay() {
 
             <div className="stats-grid">
                 <div className="stat-card">
-                    <div class="stat-icon">🎯</div>
+                    <div className="stat-icon">🎯</div>
                     <div className="stat-title">얼굴 감출 정수</div>
                     <div className="card-stat-value">{metrics.detection_score.toFixed(2)}</div>
                     <div className="stat-description">목표 ≥ 0.7 ({evaluations.detection})</div>
                 </div>
                 <div className="stat-card">
-                    <div class="stat-icon">🎪</div>
+                    <div className="stat-icon">🎪</div>
                     <div className="stat-title">감정 신뢰도</div>
                     <div className="card-stat-value">{metrics.confidence_score.toFixed(2)}</div>
                     <div className="stat-description">목표 ≥ 0.6 ({evaluations.confidence})</div>
                 </div>
                 <div className="stat-card">
-                    <div class="stat-icon">📈</div>
+                    <div className="stat-icon">📈</div>
                     <div className="stat-title">유효 측정률</div>
                     <div className="card-stat-value">{Math.round(metrics.validity_rate * 100)}%</div>
                     <div className="stat-description">목표 ≥ 70% ({evaluations.validity})</div>
                 </div>
                 <div className="stat-card">
-                    <div class="stat-icon">⚡</div>
+                    <div className="stat-icon">⚡</div>
                     <div className="stat-title">처리 응답 시간</div>
                     <div className="card-stat-value">{metrics.processing_time.toFixed(1)}초</div>
                     <div className="stat-description">목표 ≤ 2초 ({evaluations.processing})</div>
                 </div>
                 <div className="stat-card">
-                    <div class="stat-icon">🌐</div>
+                    <div className="stat-icon">🌐</div>
                     <div className="stat-title">API 성공률</div>
                     <div className="card-stat-value">{Math.round(metrics.api_success_rate * 100)}%</div>
                     <div className="stat-description">목표 ≥ 98% ({evaluations.api})</div>
