@@ -215,7 +215,7 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user 
         setVideocontent(actualEmotionContent[emotionName]);
 
         try {
-            const response = await fetch("http://localhost:5000/content_interactions/create_content_data", {
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/content_interactions/create_content_data`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -561,7 +561,7 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user 
     const create_emotion_data = async (index) => {
         try {
             if (index === 3) {
-                const response = await fetch("http://localhost:5000/emotion_measurements/create_emotion_data", {
+                const response = await fetch(`${process.env.REACT_APP_API_URL}/emotion_measurements/create_emotion_data`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
@@ -576,7 +576,7 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user 
                 if (!response.ok) throw new Error(data.message || "서버 에러");
                 console.log("생성된 데이터:", data.measurement_id);
             } else {
-                const response = await fetch("http://localhost:5000/emotion_measurements/create_emotion_data", {
+                const response = await fetch(`${process.env.REACT_APP_API_URL}/emotion_measurements/create_emotion_data`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
@@ -1341,7 +1341,7 @@ async function create_kpi_data({ user }) {
     }
 
     try {
-        const response = await fetch("http://localhost:5000/performance_metrics/create_metrics_dtaa", {
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/performance_metrics/create_metrics_dtaa`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -1373,7 +1373,7 @@ async function add_session_end_time(user) {
     const end_time = new Date().toISOString();
 
     try {
-        const response = await fetch("http://localhost:5000/session/session_end", {
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/session/session_end`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"

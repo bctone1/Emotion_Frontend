@@ -30,7 +30,7 @@ function App() {
 
   const createSession = async (user_number, user_ip, startTime) => {
     try {
-      const response = await fetch("http://localhost:5000/session/session_create", {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/session/session_create`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
