@@ -532,6 +532,18 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user 
     const [finalAnalysis, setFinalAnalysis] = useState("");
 
 
+    const [volume, setVolume] = useState(80); // 초기 볼륨 80%
+
+    // 볼륨 조정 함수
+    const handleVolumeChange = (e) => {
+        const newVolume = e.target.value;
+        setVolume(newVolume);
+        if (contentVideoRef.current) {
+            contentVideoRef.current.volume = newVolume / 100; // 0~1 사이 값으로 설정
+        }
+    };
+
+
 
 
 
@@ -896,17 +908,12 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user 
 
                     <div style={{ textAlign: "center" }}>
                         <button
-                            className={`action-button ${firstStatus === 1 ? "" : "measuring-state"
-                                }`}
-                            id="measureButton1"
+                            className={`action-button ${firstStatus === 1 ? "" : "measuring-state"}`}
                             onClick={() => measureFirstEmotion(2)}
-                            disabled={firstStatus === 2} // 측정 중일 때만 비활성화
+                            disabled={firstStatus === 2}
+                            style={{ display: `${firstStatus === 3 ? "none" : ""}` }}
                         >
-                            {firstStatus === 1
-                                ? "감정 측정하기"
-                                : firstStatus === 2
-                                    ? "측정 중..."
-                                    : "다시 측정하기"}
+                            {firstStatus === 1 ? "감정 측정하기" : "측정 중..."}
                         </button>
 
                         <button
@@ -1013,8 +1020,6 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user 
                     </h3>
 
                     <div className="content-display" id="contentDisplay">
-
-
                         <div
                             className={`stopped-screen ${isViewingStopped ? "" : "hidden"}`}
                             style={{
@@ -1093,13 +1098,52 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user 
                     </div>
 
                     <div className={`button-group ${isViewingStopped ? "hidden" : ""}`} style={{ textAlign: "center", marginTop: "30px" }}>
-                        <button
-                            className="action-button stop-button"
-                            id="stopViewingButton"
-                            onClick={() => handleVideo()}
+
+                        <button className="video-control-btn" id="playPauseBtn"
+                            onClick={() => contentVideoRef.current.pause()}
                         >
-                            감상 중지
+                            <span id="playPauseIcon">⏸️</span> <span id="playPauseText">일시정지</span>
                         </button>
+
+                        {/* 볼륨 조절 UI */}
+                        <div
+                            className="volume-control"
+                            style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "8px",
+                                marginTop: "10px",
+                            }}
+                        >
+                            <span style={{ fontSize: "1.1em" }}>🔊</span>
+                            <input
+                                type="range"
+                                min="0"
+                                max="100"
+                                value={volume}
+                                onChange={handleVolumeChange}
+                                style={{ width: "100px", height: "6px", cursor: "pointer" }}
+                            />
+                            <span
+                                id="volumeValue"
+                                style={{ fontSize: "1em", fontWeight: 600, minWidth: "35px" }}
+                            >
+                                {volume}%
+                            </span>
+                        </div>
+
+                        <button
+                            className="video-control-btn"
+                            onClick={() => {
+                                if (contentVideoRef.current) {
+                                    contentVideoRef.current.currentTime = 0; // 재생 위치를 처음으로
+                                    contentVideoRef.current.play();          // 재생 시작
+                                }
+                            }}
+                        >
+                            🔄 다시보기
+                        </button>
+
                         <button
                             className="action-button primary-button"
                             id="finishViewingButton"
@@ -1199,20 +1243,15 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user 
                         <button
                             className={`action-button ${SecondStatus === 1 ? "" : "measuring-state"
                                 }`}
-                            id="measureButton2"
                             onClick={() => measureSecondEmotion(2)}
                             disabled={SecondStatus === 2}
+                            style={{ display: `${SecondStatus === 3 ? "none" : ""}` }}
                         >
-                            {SecondStatus === 1
-                                ? "다시 측정하기"
-                                : SecondStatus === 2
-                                    ? "측정 중..."
-                                    : "다시 측정하기"}
+                            {SecondStatus === 1 ? "다시 측정하기" : "측정중..."}
                         </button>
 
                         <button
                             className={`action-button stop-button ${SecondStatus === 2 ? "" : "hidden"}`}
-                            id="stopMeasureButton1"
                             onClick={() => measureSecondEmotion(1)}
                         >
                             측정 중지
