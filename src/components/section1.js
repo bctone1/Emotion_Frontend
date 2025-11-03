@@ -946,14 +946,41 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user 
                     </h3>
 
 
-                    <div className="content-preview" id="contentPreview">
-                        <div className="content-icon" id="contentIcon">
+                    <div className="content-preview" id="contentPreview"
+                        style={{
+                            background: "linear-gradient(145deg, #faf5ff, #f3e8ff)",
+                            border: "3px solid #a855f7",
+                            borderRadius: "20px",
+                            padding: "40px",
+                            margin: "20px",
+                            textAlign: "center"
+                        }}
+                    >
+                        <div className="content-icon" id="contentIcon"
+                            style={{
+                                fontSize: "5em",
+                                marginBottom: "20px"
+                            }}
+                        >
                             {emotionContent[firstEmotionDisplay.currentEmotionName]?.icon}
                         </div>
-                        <div className="content-title" id="contentTitle">
+                        <div className="content-title" id="contentTitle"
+                            style={{
+                                fontSize: "1.8em",
+                                fontWeight: "blod",
+                                color: "#581c87",
+                                marginBottom: "15px"
+                            }}
+                        >
                             {emotionContent[firstEmotionDisplay.currentEmotionName]?.title}
                         </div>
-                        <div className="content-description" id="contentDescription">
+                        <div className="content-description" id="contentDescription"
+                            style={{
+                                fontSize: "1.3em",
+                                color: "#7c3aed",
+                                lineHeight: "1.6"
+                            }}
+                        >
                             {emotionContent[firstEmotionDisplay.currentEmotionName]?.description}
                         </div>
                     </div>
