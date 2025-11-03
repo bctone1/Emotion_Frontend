@@ -519,14 +519,14 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user 
 
     const [isViewingStopped, setIsViewingStopped] = useState(false);
 
-    const handleVideo = () => {
-        if (contentVideoRef.current) {
-            contentVideoRef.current.pause();  // 재생 중지
-            contentVideoRef.current.currentTime = 0; // 처음부터 시작
-        }
-        setIsViewingStopped(true); // 중지 화면 표시
-    };
-    
+    // const handleVideo = () => {
+    //     if (contentVideoRef.current) {
+    //         contentVideoRef.current.pause();
+    //         contentVideoRef.current.currentTime = 0;
+    //     }
+    //     setIsViewingStopped(true); // 중지 화면 표시
+    // };
+
     const [isPlaying, setIsPlaying] = useState(true);
 
     const handlePlayPause = () => {
@@ -1036,7 +1036,7 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user 
                     </h3>
 
                     <div className="content-display" id="contentDisplay">
-                        <div
+                        {/* <div
                             className={`stopped-screen ${isViewingStopped ? "" : "hidden"}`}
                             style={{
                                 color: "white",
@@ -1094,7 +1094,7 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user 
                                     다음 단계로
                                 </button>
                             </div>
-                        </div>
+                        </div> */}
 
 
 
@@ -1104,7 +1104,7 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user 
                                 src={Videocontent.videoUrl}
                                 autoPlay
                                 loop
-                                muted
+                                // muted
                                 controls={false}
                                 ref={contentVideoRef}
                             />
