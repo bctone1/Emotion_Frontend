@@ -1,0 +1,113 @@
+import React from "react";
+
+export function Step1({ onNext }) {
+  return (
+    <div className="step-content active">
+      <div className="preparation-step">
+        <h3>카메라 준비하기</h3>
+        <p>감정 인식을 위해 카메라를 준비해주세요</p>
+        <button className="action-button primary-button" onClick={onNext}>
+          동의하고 카메라 연결하기
+        </button>
+      </div>
+    </div>
+  );
+}
+
+export function Step2({ onNext, videoRef, canvasRef, emotion }) {
+  return (
+    <div className="step-content active">
+      <h3>첫 번째 감정 측정</h3>
+      <div className="camera-emotion-container">
+        <div className="webcam-container">
+          <video ref={videoRef} autoPlay muted playsInline />
+          <canvas className="face-overlay" ref={canvasRef} width="500" height="350" />
+        </div>
+        <div className="emotion-monitor">
+          <h4>실시간 감정 분석</h4>
+          <div className="current-emotion-display">
+            <span className="emotion-emoji-large">{emotion.emoji}</span>
+            <div className="emotion-name-large">
+              {emotion.name} ({emotion.confidence}%)
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style={{ textAlign: "center", marginTop: "20px" }}>
+        <button className="action-button" onClick={onNext}>
+          감정 측정 완료
+        </button>
+      </div>
+    </div>
+  );
+}
+
+export function Step3({ onNext }) {
+  return (
+    <div className="step-content active">
+      <h3>맞춤 콘텐츠 감상</h3>
+      <p>아름다운 영상을 감상하며 기분 변화를 경험하세요 🎬</p>
+      <div style={{ textAlign: "center" }}>
+        <button className="action-button primary-button" onClick={onNext}>
+          감상 완료
+        </button>
+      </div>
+    </div>
+  );
+}
+
+export function Step4({ onNext, videoRef2, canvasRef2, emotion }) {
+  return (
+    <div className="step-content active">
+      <h3>두 번째 감정 측정</h3>
+      <div className="camera-emotion-container">
+        <div className="webcam-container">
+          <video ref={videoRef2} autoPlay muted playsInline />
+          <canvas className="face-overlay" ref={canvasRef2} width="500" height="350" />
+        </div>
+        <div className="emotion-monitor">
+          <h4>실시간 감정 분석</h4>
+          <div className="current-emotion-display">
+            <span className="emotion-emoji-large">{emotion.emoji}</span>
+            <div className="emotion-name-large">
+              {emotion.name} ({emotion.confidence}%)
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style={{ textAlign: "center", marginTop: "20px" }}>
+        <button className="action-button" onClick={onNext}>
+          측정 완료
+        </button>
+      </div>
+    </div>
+  );
+}
+
+export function FinalResult({ firstResult, secondResult, onRestart }) {
+  return (
+    <div className="step-content active">
+      <h2 style={{ textAlign: "center" }}>퍼즐 완성!</h2>
+      <p style={{ textAlign: "center" }}>감정 변화를 확인해보세요.</p>
+      <div
+        style={{
+          background: "#f0f9ff",
+          padding: "20px",
+          borderRadius: "15px",
+          margin: "20px auto",
+          border: "3px solid #0ea5e9",
+          width: "400px",
+          textAlign: "center",
+        }}
+      >
+        <div>측정 전: {firstResult?.emoji} {firstResult?.name} ({firstResult?.confidence}%)</div>
+        <div>측정 후: {secondResult?.emoji} {secondResult?.name} ({secondResult?.confidence}%)</div>
+      </div>
+      <div style={{ textAlign: "center", marginTop: "30px" }}>
+        <button className="action-button primary-button" onClick={onRestart}>
+          다시 시작하기
+        </button>
+      </div>
+    </div>
+  );
+}

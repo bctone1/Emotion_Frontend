@@ -1,0 +1,163 @@
+import { useState, useRef, useEffect } from 'react';
+import * as faceapi from "@vladmandic/face-api";
+import { Step1, Step2, Step3, Step4, FinalResult } from "./Steps";
+import "../src/index.css"
+
+import Header from "./components/header";
+import Footer from "./components/footer";
+import Puzzle from "./components/puzzle ";
+
+
+export default function App() {
+    const [currentStep, setCurrentStep] = useState(1);
+    const [emotion, setEmotion] = useState({ name: "감지 중...", emoji: "😐", confidence: 0 });
+    const [firstResult, setFirstResult] = useState(null);
+    const [secondResult, setSecondResult] = useState(null);
+    const [isModelReady, setIsModelReady] = useState(false);
+
+    const videoRef = useRef(null);
+    const canvasRef = useRef(null);
+    const videoRef2 = useRef(null);
+    const canvasRef2 = useRef(null);
+
+    const detectionInterval = useRef(null);
+
+    // ✅ 모델 로드
+    useEffect(() => {
+        const loadModels = async () => {
+            await faceapi.nets.tinyFaceDetector.loadFromUri("/models");
+            await faceapi.nets.faceExpressionNet.loadFromUri("/models");
+            console.log("✅ face-api.js 모델 로드 완료");
+            setIsModelReady(true);
+        };
+        loadModels();
+    }, []);
+
+    // ✅ 카메라 시작
+    const startCamera = async (videoElement) => {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            if (videoElement.current) {
+                videoElement.current.srcObject = stream;
+            }
+        } catch (err) {
+            alert("카메라 연결 실패: " + err.message);
+        }
+    };
+
+    // ✅ 감정 인식 시작
+    const startDetection = (videoElement, saveResultCallback) => {
+        if (!videoElement.current) return;
+
+        detectionInterval.current = setInterval(async () => {
+            const detections = await faceapi
+                .detectSingleFace(videoElement.current, new faceapi.TinyFaceDetectorOptions())
+                .withFaceExpressions();
+
+            if (detections && detections.expressions) {
+                const sorted = Object.entries(detections.expressions).sort((a, b) => b[1] - a[1]);
+                const [bestEmotion, confidence] = sorted[0];
+
+                const emojiMap = {
+                    happy: "😊",
+                    sad: "😢",
+                    angry: "😠",
+                    fearful: "😨",
+                    disgusted: "🤢",
+                    surprised: "😲",
+                    neutral: "😐",
+                };
+
+                const result = {
+                    name: bestEmotion,
+                    emoji: emojiMap[bestEmotion] || "😐",
+                    confidence: Math.round(confidence * 100),
+                };
+
+                setEmotion(result);
+                if (saveResultCallback) {
+                    saveResultCallback(result);
+                }
+            }
+        }, 500);
+    };
+
+    // ✅ 감정 인식 중지
+    const stopDetection = () => {
+        if (detectionInterval.current) {
+            clearInterval(detectionInterval.current);
+            detectionInterval.current = null;
+        }
+    };
+
+    // ✅ 단계 진행
+    const goStep2 = async () => {
+        if (!isModelReady) {
+            alert("모델이 아직 준비되지 않았습니다. 잠시 후 다시 시도해주세요.");
+            return;
+        }
+        await startCamera(videoRef);
+        setCurrentStep(2);
+        startDetection(videoRef, setFirstResult);
+    };
+
+    const goStep3 = () => {
+        stopDetection();
+        setCurrentStep(3);
+    };
+
+    const goStep4 = async () => {
+        await startCamera(videoRef2);
+        setCurrentStep(4);
+        startDetection(videoRef2, setSecondResult);
+    };
+
+    const goResult = () => {
+        stopDetection();
+        setCurrentStep(5);
+    };
+
+    const restart = () => {
+        stopDetection();
+        setEmotion({ name: "감지 중...", emoji: "😐", confidence: 0 });
+        setFirstResult(null);
+        setSecondResult(null);
+        setCurrentStep(1);
+    };
+
+    return (
+        <div className="container">
+            <Header />
+
+
+            <div className="main-puzzle-container">
+                <Puzzle PuzzleStatus={currentStep}/>
+
+                {currentStep === 1 && <Step1 onNext={goStep2} />}
+                {currentStep === 2 && (
+                    <Step2
+                        onNext={goStep3}
+                        videoRef={videoRef}
+                        canvasRef={canvasRef}
+                        emotion={emotion}
+                    />
+                )}
+                {currentStep === 3 && <Step3 onNext={goStep4} />}
+                {currentStep === 4 && (
+                    <Step4
+                        onNext={goResult}
+                        videoRef2={videoRef2}
+                        canvasRef2={canvasRef2}
+                        emotion={emotion}
+                    />
+                )}
+                {currentStep === 5 && (
+                    <FinalResult firstResult={firstResult} secondResult={secondResult} onRestart={restart} />
+                )}
+            </div>
+
+
+            <Footer />
+        </div>
+    );
+}

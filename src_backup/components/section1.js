@@ -605,197 +605,79 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user 
 
     return (
         <>
-            <div className="current-step" id="currentStepText" style={{ cursor: "pointer", display: `${PuzzleStatus === 1 ? "" : "none"}` }}>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "15px" }}>
-                    <span>1단계: 감정 측정을 위한 준비를 시작해보세요!</span>
-                    <span style={{ fontSize: "0.8em", animation: "bounce 2s infinite" }}>⬇️</span>
+            {/* 1단계: 준비 */}
+            <div className={`step-content ${PuzzleStatus === 1 ? "active" : ""}`} id="step1">
+                <div className="preparation-step">
+                    <div className="camera-setup">
+                        <div className="camera-icon">📷</div>
+                        <h3 style={{ fontSize: "2.2em", marginBottom: "20px", color: "#0c4a6e" }}>
+                            카메라 준비하기
+                        </h3>
+                        <p style={{ fontSize: "1.4em", color: "#0369a1", marginBottom: "25px" }}>
+                            감정 인식을 위해 카메라를 준비해주세요
+                        </p>
+
+                        {/* 카메라 사용 동의 및 안내 */}
+                        <div style={{
+                            background: "#fef3c7",
+                            border: "2px solid #f59e0b",
+                            borderRadius: "15px",
+                            padding: "20px",
+                            margin: "20px 0",
+                            textAlign: "left"
+                        }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "15px" }}>
+                                <span style={{ fontSize: "1.5em" }}>📷</span>
+                                <strong style={{ color: "#92400e", fontSize: "1.2em" }}>카메라 사용 동의</strong>
+                            </div>
+                            <div style={{ color: "#92400e", lineHeight: 1.5, fontSize: "1.1em" }}>
+                                <div style={{ marginBottom: "10px" }}>✅ <strong>데이터 처리 방식:</strong></div>
+                                <ul style={{ margin: "10px 0 15px 20px" }}>
+                                    <li>웹캠 영상은 <strong>실시간으로만</strong> 분석됩니다</li>
+                                    <li>어떠한 영상이나 이미지도 <strong>저장되지 않습니다</strong></li>
+                                    <li>모든 처리는 브라우저 내에서만 이루어집니다</li>
+                                    <li>서버로 전송되는 데이터는 없습니다</li>
+                                </ul>
+                                <div style={{
+                                    background: "rgba(239, 68, 68, 0.1)",
+                                    padding: "10px",
+                                    borderRadius: "8px",
+                                    borderLeft: "4px solid #ef4444"
+                                }}>
+                                    <strong>⚠️ 중요:</strong> 카메라 연결을 진행하시면 위 내용에 동의하는 것으로 간주됩니다.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style={{ fontSize: "1.2em", color: "#0284c7", lineHeight: 1.8 }}>
+                            밝은 곳에서 진행해주세요<br />
+                            얼굴이 잘 보이도록 위치를 조정해주세요<br />
+                            편안한 자세로 앉아주세요
+                        </div>
+                    </div>
+
+                    {/* 버튼 이벤트 핸들러도 onClick으로 수정 */}
+                    <button
+                        className="action-button primary-button"
+                        onClick={() => setupCamera()}
+                    >
+                        동의하고 카메라 연결하기
+                    </button>
                 </div>
             </div>
 
-            {/* 1단계: 준비 */}
-            <div className={`step-content ${PuzzleStatus === 1 ? "active" : ""}`} id="step1">
-                <div className="preparation-step" style={{ padding: "25px" }}>
-                    {/* 2열 그리드 레이아웃  */}
-                    <div style={{
-                        display: "grid",
-                        gridTemplateColumns: "1fr 1fr",
-                        gap: "18px",
-                        maxWidth: "1100px",
-                        margin: "0 auto 20px auto"
-                    }}>
-                        {/* 왼쪽: 카메라 준비하기 */}
-                        <div
-                            style={{
-                                background: "linear-gradient(145deg, #e0f2fe, #bae6fd)",
-                                border: "3px solid  #0ea5e9",
-                                borderRadius: "20px",
-                                padding: "20px",
-                                textAlign: "cen"
-                            }}>
-                            <div style={{ fontSize: "2.8em", marginBottom: "8px" }}>📷</div>
-                            <h3 style={{ ontSize: "1.5em", marginBottom: "8px", color: "#0c4a6e" }}>카메라 준비하기</h3>
-                            <p style={{ fontSize: "0.95em", color: " #0369a1", marginBottom: "20px" }}>
-                                감정 인식을 위해 카메라를 준비해주세요
-                            </p>
-
-                            {/* 카메라 사용 동의 */}
-                            <div
-                                style={{ background: " #fef3c7", border: "2px solid #f59e0b", borderRadius: "10px", padding: " 10px", textAlign: "left", marginTop: "20px" }}>
-                                <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "5px" }}>
-                                    <span style={{ fontSize: "1em" }}>📷</span>
-                                    <strong style={{ color: "#92400e", fontSize: "0.9em" }}>카메라 사용 동의</strong>
-                                </div>
-                                <div style={{ color: "#92400e", lineHeight: "1.25", fontSize: "0.75em" }}>
-                                    <div style={{ marginBottom: "3px" }}>✅ <strong>데이터 처리 방식:</strong></div>
-                                    <ul style={{ margin: "3px 0 3px 10px;", fontSize: "0.95em", paddingLeft: "6px" }}>
-                                        <li>웹캠 영상은 <strong>실시간으로만</strong> 분석됩니다</li>
-                                        <li>어떠한 영상이나 이미지도 <strong>저장되지 않습니다</strong></li>
-                                        <li>모든 처리는 브라우저 내에서만 이루어집니다</li>
-                                        <li>서버로 전송되는 데이터는 없습니다</li>
-                                    </ul>
-                                    <div
-                                        style={{ background: " rgba(239, 68, 68, 0.1)", padding: "5px", borderRadius: "5px", borderLeft: "3px solid #ef4444", marginTop: "5px", fontSize: "0.95em" }}>
-                                        <strong>⚠️ 중요:</strong> 카메라 연결을 진행하시면 위 내용에 동의하는 것으로 간주됩니다.
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* 오른쪽: 측정 환경 가이드 */}
-                        <div
-                            style={{
-                                background: "linear-gradient(145deg, #d1fae5, #a7f3d0)",
-                                border: "3px solid #10b981",
-                                borderRadius: "20px",
-                                padding: "16px"
-                            }}
-                        >
-                            <div style={{ textAlign: "center", marginBottom: "10px" }}>
-                                <span style={{ fontSize: "1.2em", marginRight: "5px" }}>📋</span>
-                                <strong style={{ color: "#047857", fontSize: "1.3em" }}>측정 환경 가이드</strong>
-                            </div>
-
-                            {/* 2x2 그리드로 4가지 가이드 항목 배치 - 더 컴팩트하게 */}
-                            <div
-                                style={{
-                                    display: "grid",
-                                    gridTemplateColumns: "1fr 1fr",
-                                    gap: "8px",
-                                    marginBottom: "8px"
-                                }}
-                            >
-                                {[
-                                    { icon: "💡", title: "밝은 조명", desc: "밝은 곳에서 진행" },
-                                    { icon: "👤", title: "얼굴 위치", desc: "화면의 60-80%" },
-                                    { icon: "📏", title: "적정 거리", desc: "50-70cm 유지" },
-                                    { icon: "🪑", title: "편안한 자세", desc: "편하게 앉기" }
-                                ].map((item, idx) => (
-                                    <div
-                                        key={idx}
-                                        style={{
-                                            background: "rgba(255, 255, 255, 0.7)",
-                                            border: "2px solid #34d399",
-                                            borderRadius: "8px",
-                                            padding: "8px",
-                                            textAlign: "center"
-                                        }}
-                                    >
-                                        <div style={{ fontSize: "1.6em", marginBottom: "3px" }}>{item.icon}</div>
-                                        <div
-                                            style={{
-                                                fontWeight: 700,
-                                                color: "#047857",
-                                                fontSize: "0.85em",
-                                                marginBottom: "1px"
-                                            }}
-                                        >
-                                            {item.title}
-                                        </div>
-                                        <div style={{ fontSize: "0.72em", color: "#059669" }}>{item.desc}</div>
-                                    </div>
-                                ))}
-                            </div>
-
-                            {/* 얼굴 위치 예시 (실제 이미지) - 더 컴팩트하게 */}
-                            <div
-                                style={{
-                                    background: "rgba(255, 255, 255, 0.5)",
-                                    border: "2px dashed #34d399",
-                                    borderRadius: "8px",
-                                    padding: "8px",
-                                    textAlign: "center"
-                                }}
-                            >
-                                <div
-                                    style={{
-                                        color: "#047857",
-                                        fontWeight: 600,
-                                        marginBottom: "5px",
-                                        display: "flex",
-                                        alignItems: "center",
-                                        justifyContent: "center",
-                                        gap: "5px",
-                                        fontSize: "0.85em"
-                                    }}
-                                >
-                                    <span>✨</span>
-                                    <span>얼굴 위치 예시</span>
-                                </div>
-                                <img src="/촬영 위치 예시.png" alt="얼굴 위치 가이드" style={{ width: "100%", height: "auto", borderRadius: "6px", boxShadow: "0 2px 6px rgba(0,0,0,0.1)" }} />
-
-
-                                <div
-                                    style={{
-                                        fontSize: "0.7em",
-                                        color: "#059669",
-                                        marginTop: "4px",
-                                        lineHeight: 1.2
-                                    }}
-                                >
-                                    적절한 얼굴 크기와 위치로 측정 정확도를 높여보세요
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
-
-
-
-
-
-
-
-
-
-                    {/* 하단 버튼  */}
-                    <div style={{ textAlign: "center" }}>
-                        <button
-                            className="action-button primary-button"
-                            onClick={() => setupCamera()}
-                        >
-                            동의하고 카메라 연결하기
-                        </button>
-                    </div>
-                </div>
-
-
-
-
-            </div >
-
             {/* 2단계: 첫 번째 감정 측정 */}
-            < div className={`step-content ${PuzzleStatus === 2 ? "active" : ""}`
-            } id="step2" >
+            <div className={`step-content ${PuzzleStatus === 2 ? "active" : ""}`} id="step2">
                 <div className="webcam-section">
                     <h3
                         style={{
-                            fontSize: "1.6em",
-                            marginBottom: "12px",
+                            fontSize: "2.2em",
+                            marginBottom: "25px",
                             color: "#1f2937",
                             textAlign: "center",
                         }}
                     >
-                        감정 측정
+                        첫 번째 감정 측정
                     </h3>
 
                     <div className="camera-emotion-container">
@@ -873,9 +755,9 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user 
                     <div
                         id="emotionStatus"
                         style={{
-                            fontSize: "1.1em",
+                            fontSize: "1.4em",
                             color: "#4b5563",
-                            margin: "10px 0",
+                            margin: "20px 0",
                             textAlign: "center",
                         }}
                     >
@@ -928,11 +810,11 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user 
                         </button>
                     </div>
                 </div>
-            </div >
+            </div>
 
 
             {/* 3단계: 콘텐츠 추천 및 실제 감상 */}
-            < div className={`step-content ${PuzzleStatus === 3 ? "active" : ""}`} id="step3" >
+            <div className={`step-content ${PuzzleStatus === 3 ? "active" : ""}`} id="step3">
                 <div className={`content-recommendation ${actualContentVisible ? "hidden" : ""}`} >
                     <h3
                         style={{
@@ -1082,10 +964,10 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user 
                         </button>
                     </div>
                 </div>
-            </div >
+            </div>
 
             {/* 4단계: 두 번째 감정 측정 */}
-            < div className={`step-content ${PuzzleStatus === 4 ? "active" : ""}`} id="step4" >
+            <div className={`step-content ${PuzzleStatus === 4 ? "active" : ""}`} id="step4">
                 <div className="webcam-section">
                     <h3
                         style={{

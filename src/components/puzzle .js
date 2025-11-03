@@ -12,32 +12,48 @@ export default function Puzzle({ PuzzleStatus }) {
     const getStatusClass = (step) => {
         if (PuzzleStatus === step) return "active";
         if (PuzzleStatus > step) return "completed";
-        return "inactive";
+        return "pending";
     };
 
     return (
         <>
-            <div className="puzzle-board" id="puzzleBoard">
-                <div className={`mini-puzzle-piece piece-1 ${getStatusClass(1)}`} id="miniPiece1">
-                    <div className="mini-piece-icon">📷</div>
-                    <div className="mini-piece-text">카메라 준비</div>
-                </div>
-                <div className={`mini-puzzle-piece piece-2 ${getStatusClass(2)}`} id="miniPiece2">
-                    <div className="mini-piece-icon">😊</div>
-                    <div className="mini-piece-text">첫 감정 측정</div>
-                </div>
-                <div className={`mini-puzzle-piece piece-3 ${getStatusClass(3)}`} id="miniPiece3">
-                    <div className="mini-piece-icon">🎨</div>
-                    <div className="mini-piece-text">콘텐츠 감상</div>
-                </div>
-                <div className={`mini-puzzle-piece piece-4 ${getStatusClass(4)}`} id="miniPiece4">
-                    <div className="mini-piece-icon">📊</div>
-                    <div className="mini-piece-text">변화 분석</div>
-                </div>
+            <div className="api-status" id="apiStatus" style={{ display: "none" }}>
+                Face-api.js 라이브러리를 CDN에서 로드하여 실제 감정 인식을 시도합니다.
             </div>
 
-            <div className="current-step" id="currentStepText">
-                {stepTexts[PuzzleStatus] || "모든 단계를 완료했습니다! 🎉"}
+            <div className="step-internal-puzzle" id="globalPuzzleProgress">
+                <div className="puzzle-board" id="puzzleBoard">
+                    <div className="progress-line">
+                        <div className="progress-line-fill" id="progressLineFill"></div>
+                    </div>
+
+
+                    <div className={`mini-puzzle-piece ${getStatusClass(1)}`}>
+                        <div className="mini-piece-icon">📷</div>
+                        <div className="mini-piece-text">카메라 준비</div>
+                    </div>
+                    <div className={`mini-puzzle-piece ${getStatusClass(2)}`}>
+                        <div className="mini-piece-icon">😊</div>
+                        <div className="mini-piece-text">첫 감정 측정</div>
+                    </div>
+                    <div className={`mini-puzzle-piece ${getStatusClass(3)}`}>
+                        <div className="mini-piece-icon">🎨</div>
+                        <div className="mini-piece-text">콘텐츠 감상</div>
+                    </div>
+
+                    <div className={`mini-puzzle-piece ${getStatusClass(4)}`}>
+                        <div className="mini-piece-icon">😊</div>
+                        <div className="mini-piece-text">두 감정 측정</div>
+                    </div>
+
+                    <div className={`mini-puzzle-piece ${getStatusClass(5)}`}>
+                        <div className="mini-piece-icon">📊</div>
+                        <div className="mini-piece-text">변화 분석</div>
+                    </div>
+
+
+
+                </div>
             </div>
         </>
     );
