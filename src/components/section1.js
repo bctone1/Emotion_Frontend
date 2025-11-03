@@ -518,12 +518,28 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user 
     const contentVideoRef = useRef(null);
 
     const [isViewingStopped, setIsViewingStopped] = useState(false);
+
     const handleVideo = () => {
         if (contentVideoRef.current) {
             contentVideoRef.current.pause();  // 재생 중지
             contentVideoRef.current.currentTime = 0; // 처음부터 시작
         }
         setIsViewingStopped(true); // 중지 화면 표시
+    };
+    
+    const [isPlaying, setIsPlaying] = useState(true);
+
+    const handlePlayPause = () => {
+        const video = contentVideoRef.current;
+        if (!video) return;
+
+        if (video.paused) {
+            video.play();
+            setIsPlaying(true);
+        } else {
+            video.pause();
+            setIsPlaying(false);
+        }
     };
 
 
@@ -1099,10 +1115,13 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user 
 
                     <div className={`button-group ${isViewingStopped ? "hidden" : ""}`} style={{ textAlign: "center", marginTop: "30px" }}>
 
-                        <button className="video-control-btn" id="playPauseBtn"
-                            onClick={() => contentVideoRef.current.pause()}
+                        <button
+                            className="video-control-btn"
+                            id="playPauseBtn"
+                            onClick={handlePlayPause}
                         >
-                            <span id="playPauseIcon">⏸️</span> <span id="playPauseText">일시정지</span>
+                            <span id="playPauseIcon">{isPlaying ? "⏸️" : "▶️"}</span>{" "}
+                            <span id="playPauseText">{isPlaying ? "일시정지" : "재생"}</span>
                         </button>
 
                         {/* 볼륨 조절 UI */}
