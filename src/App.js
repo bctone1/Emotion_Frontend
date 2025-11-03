@@ -7,7 +7,7 @@ import "../src/index.css"
 import { useState, useEffect, useRef } from 'react';
 
 function App() {
-  const [PuzzleStatus, setPuzzleStatus] = useState(3);
+  const [PuzzleStatus, setPuzzleStatus] = useState(1);
 
   const [total, settotal] = useState({
     total_users: null,
