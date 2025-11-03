@@ -15,6 +15,10 @@ export default function Puzzle({ PuzzleStatus }) {
         return "pending";
     };
 
+    const totalSteps = 5;
+    const progressPercent = Math.min(((PuzzleStatus - 1) / (totalSteps - 1)) * 100, 100);
+
+
     return (
         <>
             <div className="api-status" id="apiStatus" style={{ display: "none" }}>
@@ -24,7 +28,12 @@ export default function Puzzle({ PuzzleStatus }) {
             <div className="step-internal-puzzle" id="globalPuzzleProgress">
                 <div className="puzzle-board" id="puzzleBoard">
                     <div className="progress-line">
-                        <div className="progress-line-fill" id="progressLineFill"></div>
+                        <div className="progress-line-fill" id="progressLineFill"
+                            style={{
+                                width: `${progressPercent}%`,
+                                transition: "width 0.5s ease" // 부드럽게 채워지도록
+                            }}
+                        ></div>
                     </div>
 
 

@@ -1105,7 +1105,7 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user 
                             id="finishViewingButton"
                             onClick={() => setPuzzleStatus(4)}
                         >
-                            감상 완료
+                            ✅ 감상 완료
                         </button>
                     </div>
                 </div>
@@ -1239,16 +1239,16 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user 
                 <div style={{ textAlign: "center", marginBottom: "30px" }}>
                     <h2
                         style={{
-                            fontSize: "2.5em",
+                            fontSize: "1.8em",
                             color: "#1f2937",
-                            marginBottom: "20px",
+                            marginBottom: "12px",
                         }}
                     >
-                        퍼즐 완성!
+                        감정 분석 완료!
                     </h2>
                     <p
                         style={{
-                            fontSize: "1.4em",
+                            fontSize: "1.1em",
                             color: "#4b5563",
                         }}
                     >
@@ -1258,41 +1258,56 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user 
                     <div
                         style={{
                             background: "linear-gradient(145deg, #f0f9ff, #e0f2fe)",
-                            padding: "20px",
-                            borderRadius: "15px",
-                            margin: "20px 0",
-                            border: "3px solid #0ea5e9",
+                            padding: "15px",
+                            borderRadius: "12px",
+                            margin: "15px 0",
+                            border: "2px solid #0ea5e9",
                         }}
                     >
                         <div
                             style={{
-                                fontSize: "1.2em",
+                                fontSize: "1em",
                                 color: "#0c4a6e",
-                                marginBottom: "10px",
+                                marginBottom: "6px",
                             }}
                         >
                             총 소요 시간: <span id="totalTime">03:45</span>
                         </div>
-                        <div style={{ fontSize: "1em", color: "#0369a1" }}>
-                            측정 결과가 데이터베이스에 저장되었습니다 (ID: #
-                            <span id="measurementId">2024001247</span>)
+                        <div style={{ fontSize: "0.9em", color: "#0369a1" }}>
+                            측정 결과가 데이터베이스에 저장되었습니다
+                            {/* (ID: #<span id="measurementId">2024001247</span>) */}
                         </div>
                     </div>
                 </div>
 
                 <div className="statistics-section">
-                    <h3
-                        style={{
-                            fontSize: "2.5em",
-                            marginBottom: "30px",
-                            color: "#1f2937",
-                            textAlign: "center",
-                        }}
-                    >
+                    <h3 style={{ fontSize: "1.8em", marginBottom: "20px", color: "#1f2937", textAlign: "center", }}>
                         감정 변화 통계 분석
                     </h3>
 
                     <div className="stats-grid">
+
+                        {/* 측정 전 */}
+                        <div className="stat-card">
+                            <div className="stat-icon">{firstEmotionDisplay.currentEmotionEmoji}</div>
+                            <div className="stat-title">측정 전</div>
+                            <div className="card-stat-value">{firstEmotionDisplay.currentEmotionName}</div>
+                            <div className="stat-description">
+                                신뢰도 {firstEmotionDisplay.confidence}%
+                            </div>
+                        </div>
+
+                        {/* 측정 후 */}
+                        <div className="stat-card">
+                            <div className="stat-icon">{SecondEmotionDisplay.currentEmotionEmoji}</div>
+                            <div className="stat-title">측정 후</div>
+                            <div className="card-stat-value">{SecondEmotionDisplay.currentEmotionName}</div>
+                            <div className="stat-description">
+                                신뢰도 {SecondEmotionDisplay.confidence}%
+                            </div>
+                        </div>
+
+
                         {/* 감정 변화 */}
                         <div className="stat-card">
                             <div className="stat-icon">🔄</div>
@@ -1327,27 +1342,6 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user 
                             </div>
                         </div>
 
-                        {/* 측정 전 */}
-                        <div className="stat-card">
-                            <div className="stat-icon">{firstEmotionDisplay.currentEmotionEmoji}</div>
-                            <div className="stat-title">측정 전</div>
-                            <div className="card-stat-value">{firstEmotionDisplay.currentEmotionName}</div>
-                            <div className="stat-description">
-                                신뢰도 {firstEmotionDisplay.confidence}%
-                            </div>
-                        </div>
-
-                        {/* 측정 후 */}
-                        <div className="stat-card">
-                            <div className="stat-icon">{SecondEmotionDisplay.currentEmotionEmoji}</div>
-                            <div className="stat-title">측정 후</div>
-                            <div className="card-stat-value">{SecondEmotionDisplay.currentEmotionName}</div>
-                            <div className="stat-description">
-                                신뢰도 {SecondEmotionDisplay.confidence}%
-                            </div>
-                        </div>
-
-
                     </div>
 
 
@@ -1355,13 +1349,13 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user 
                         id="finalAnalysis"
                         style={{
                             textAlign: "center",
-                            margin: "30px 0",
-                            fontSize: "1.6em",
+                            margin: "20px 0",
+                            fontSize: "1.2em",
                             color: "#1f2937",
                             background: "linear-gradient(145deg, #f0fdf4, #dcfce7)",
-                            padding: "30px",
-                            borderRadius: "20px",
-                            border: "3px solid #16a34a",
+                            padding: "20px",
+                            borderRadius: "15px",
+                            border: "2px solid #16a34a",
                         }}
                     >
                         {finalAnalysis}
@@ -1370,30 +1364,12 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user 
                 </div>
 
                 {/* 정량적 지표 평가 섹션 */}
-                <div
-                    className="statistics-section"
-                    style={{
-                        border: "4px solid #8b5cf6",
-                        background: "linear-gradient(145deg, #faf5ff, #f3e8ff)",
-                    }}
-                >
-                    <h3
-                        style={{
-                            fontSize: "2.5em",
-                            marginBottom: "30px",
-                            color: "#7c3aed",
-                            textAlign: "center",
-                        }}
-                    >
+                {/* <div className="statistics-section" style={{ border: "3px solid #8b5cf6", background: "linear-gradient(145deg, #faf5ff, #f3e8ff)", }}>
+                    <h3 style={{ fontSize: "2.5em", marginBottom: "30px", color: "#7c3aed", textAlign: "center", }}>
                         📊 정량적 성능 지표 (KPI)
                     </h3>
-
                     {updateKPIDisplay()}
-
-
-
-
-                </div>
+                </div> */}
 
                 <div style={{ textAlign: "center", marginTop: "40px" }}>
                     <button
