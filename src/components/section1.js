@@ -397,7 +397,7 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user,
             ctx.clearRect(0, 0, canvas.width, canvas.height);
         };
     }
-
+    const stopDetectionRef = useRef(null); // ✅ 여기 추가
 
 
 
