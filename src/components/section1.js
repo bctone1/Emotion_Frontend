@@ -332,6 +332,7 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user 
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
 
                 if (resizedDetections.length > 0) {
+                    console.log(resizedDetections);
                     const detection = resizedDetections[0];
                     // 얼굴 경계 그리기
                     const box = detection.detection.box;
@@ -427,14 +428,14 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user 
 
     const [firstEmotionDisplay, setFirstEmotionDisplay] = useState({
         currentEmotionEmoji: "😐",
-        currentEmotionName: "감지 중...",
+        currentEmotionName: "중립",
         currentEmotionMessage: "자연스러운 표정으로 화면을 보고 있어주세요",
         confidence: 0,
         emotions: { // 각 감정별 확률
             happy: 0,
             sad: 0,
             angry: 0,
-            neutral: 0,
+            neutral: 70,
             surprised: 0,
             fearful: 0,
             disgusted: 0,
@@ -444,7 +445,7 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user 
 
     const [SecondEmotionDisplay, setSecondEmotionDisplay] = useState({
         currentEmotionEmoji: "😐",
-        currentEmotionName: "감지 중...",
+        currentEmotionName: "중립",
         currentEmotionMessage: "자연스러운 표정으로 화면을 보고 있어주세요",
         confidence: 0,
         emotions: { // 각 감정별 확률
@@ -452,7 +453,7 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user 
             sad: 0,
             angry: 0,
             neutral: 0,
-            surprised: 0,
+            surprised: 70,
             fearful: 0,
             disgusted: 0,
             confused: 0
@@ -466,9 +467,9 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user 
         // 상태 초기화 (optional)
         setFirstEmotionDisplay({
             ...firstEmotionDisplay,
-            currentEmotionMessage: "측정 중...",
             currentEmotionEmoji: "😐",
-            currentEmotionName: "감지 중..."
+            currentEmotionName: "감지 중...",
+            currentEmotionMessage: "자연스러운 표정으로 화면을 보고 있어주세요",
         });
         // interval 재시작
         if (videoRef.current && modelsLoaded) {
