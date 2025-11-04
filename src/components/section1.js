@@ -333,59 +333,59 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user,
         canvas.height = displaySize.height;
         const ctx = canvas.getContext("2d");
 
+        // 기존 interval 제거
         if (intervalRef.current) clearInterval(intervalRef.current);
-        intervalRef.current = setInterval(async () => {
-            if (!modelsLoaded) return;
+
+        let isRunning = true;
+        intervalRef.current = true; // 측정 중 표시
+
+        const detectLoop = async () => {
+            if (!isRunning || !modelsLoaded) return;
 
             try {
                 const DETECTION_OPTIONS = new faceapi.SsdMobilenetv1Options({
-                    minConfidence: 0.5,  // 최소 신뢰도 (0.5 = 50%)
-                    maxResults: 10       // 최대 감지 얼굴 수
+                    minConfidence: 0.5,
+                    maxResults: 10,
                 });
 
                 const detections = await faceapi
-                    // .detectAllFaces(video, new faceapi.TinyFaceDetectorOptions()) //수정 전 모델
                     .detectAllFaces(video, DETECTION_OPTIONS)
                     .withFaceLandmarks()
                     .withFaceExpressions();
 
                 const resizedDetections = faceapi.resizeResults(detections, displaySize);
-
-                // 캔버스 클리어
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
 
                 if (resizedDetections.length > 0) {
-                    console.log(resizedDetections);
                     const detection = resizedDetections[0];
-                    // 얼굴 경계 그리기
                     const box = detection.detection.box;
-                    ctx.strokeStyle = '#00FF00'; // 박스 색상
-                    ctx.lineWidth = 2;           // 박스 두께
+
+                    // 얼굴 테두리
+                    ctx.strokeStyle = "#00FF00";
+                    ctx.lineWidth = 2;
                     ctx.strokeRect(box.x, box.y, box.width, box.height);
 
-                    // 랜드마크 그리기
+                    // 랜드마크
                     const landmarks = detection.landmarks;
-                    ctx.fillStyle = '#FF0000'; // 점 색상
-                    landmarks.positions.forEach(point => {
+                    ctx.fillStyle = "#FF0000";
+                    landmarks.positions.forEach((p) => {
                         ctx.beginPath();
-                        ctx.arc(point.x, point.y, 2, 0, 2 * Math.PI); // 점 크기
+                        ctx.arc(p.x, p.y, 2, 0, 2 * Math.PI);
                         ctx.fill();
                     });
 
-                    // 감정 로그
+                    // 감정 처리
                     const emotions = detection.expressions;
                     const sorted = Object.entries(emotions).sort((a, b) => b[1] - a[1]);
                     const maxValue = sorted[0][1];
                     const confidence = Math.round(maxValue * 100);
-                    const finalConfidence = Math.max(confidence, 60);
 
-
-                    if (PuzzleStatus === 2) {
-                        setFirstEmotionDisplay(prev => ({
+                    const updateEmotionState = (setDisplay) =>
+                        setDisplay((prev) => ({
                             ...prev,
                             currentEmotionEmoji: emotionEmojiMap(sorted[0][0]),
                             currentEmotionName: emotionLabelMap(sorted[0][0]),
-                            confidence: confidence,
+                            confidence,
                             currentEmotionMessage: "얼굴이 감지되었습니다!",
                             emotions: {
                                 happy: emotions.happy,
@@ -395,38 +395,51 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user,
                                 surprised: emotions.surprised,
                                 fearful: emotions.fearful,
                                 disgusted: emotions.disgusted,
-                                confused: emotions.confused || 0
-                            }
+                                confused: emotions.confused || 0,
+                            },
                         }));
 
-                    } else {
-                        updateDetectionMetrics({ detectionSuccess: true, confidence: finalConfidence });
+                    if (PuzzleStatus === 2) updateEmotionState(setFirstEmotionDisplay);
+                    else updateEmotionState(setSecondEmotionDisplay);
 
-                        setSecondEmotionDisplay(prev => ({
-                            ...prev,
-                            currentEmotionEmoji: emotionEmojiMap(sorted[0][0]),
-                            currentEmotionName: emotionLabelMap(sorted[0][0]),
-                            confidence: confidence,
-                            currentEmotionMessage: "얼굴이 감지되었습니다!",
-                            emotions: {
-                                happy: emotions.happy,
-                                sad: emotions.sad,
-                                angry: emotions.angry,
-                                neutral: emotions.neutral,
-                                surprised: emotions.surprised,
-                                fearful: emotions.fearful,
-                                disgusted: emotions.disgusted,
-                                confused: emotions.confused || 0
-                            }
-                        }));
-                    }
-                    console.log("현재 감정:", sorted[0][0], " (확률:", sorted[0][1].toFixed(2), ")");
+                } else {
+                    // 얼굴 감지 X 시
+                    setFirstEmotionDisplay((prev) => ({
+                        ...prev,
+                        currentEmotionEmoji: "😐",
+                        currentEmotionName: "감지 중...",
+                        currentEmotionMessage: "얼굴을 카메라 앞에 위치시켜주세요",
+                        confidence: 0,
+                        emotions: {
+                            happy: 0,
+                            sad: 0,
+                            angry: 0,
+                            neutral: 0,
+                            surprised: 0,
+                            fearful: 0,
+                            disgusted: 0,
+                            confused: 0,
+                        },
+                    }));
                 }
             } catch (err) {
                 console.error("얼굴 감지 오류:", err);
             }
-        }, 300);
+
+            // 다음 프레임 예약 (setInterval 대신 requestAnimationFrame)
+            if (isRunning) requestAnimationFrame(detectLoop);
+        };
+
+        detectLoop(); // 루프 시작
+
+        // stop 함수: 외부에서 호출 가능하도록 반환
+        return () => {
+            isRunning = false;
+            intervalRef.current = null;
+            console.log("🔴 감정 감지 중지됨");
+        };
     }
+
 
 
     const [firstEmotionDisplay, setFirstEmotionDisplay] = useState({
