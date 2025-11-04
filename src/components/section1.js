@@ -503,30 +503,22 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user,
 
             setfirstStatus(3);
             timeoutRef.current = null;
+            setTimeout(() => {
+                videoRef.current?.scrollIntoView({
+                    behavior: "smooth",
+                    block: "start",
+                });
+            }, 200);
         }, 5000);
     };
 
 
     const measureSecondEmotion = (int) => {
-        setTimeout(() => {
-            ScrollWrap.current?.scrollIntoView({
-                behavior: "smooth",
-                block: "start",
-            });
-        }, 200);
+        setTimeout(() => ScrollWrap.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 200);
         setSecondStatus(int);
         if (int === 1) {
-            // interval 정리
-            if (intervalRef.current) {
-                clearInterval(intervalRef.current);
-                intervalRef.current = null;
-            }
-
-            // ✅ timeout 정리
-            if (timeoutRef.current) {
-                clearTimeout(timeoutRef.current);
-                timeoutRef.current = null;
-            }
+            if (intervalRef.current) clearInterval(intervalRef.current);
+            if (timeoutRef.current) clearTimeout(timeoutRef.current);
             return;
         }
 
@@ -540,13 +532,20 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user,
                 intervalRef.current = null;
             }
 
-            setSecondEmotionDisplay({
-                ...SecondEmotionDisplay,
-                currentEmotionMessage: "측정 완료!",
-            });
-
+            // ✅ 5초 후 최신 감정값 반영
+            const lastEmotion = latestEmotionRef.current;
+            if (lastEmotion) {
+                setSecondEmotionDisplay(prev => ({
+                    ...prev,
+                    currentEmotionEmoji: emotionEmojiMap(lastEmotion.emotion),
+                    currentEmotionName: emotionLabelMap(lastEmotion.emotion),
+                    confidence: lastEmotion.confidence,
+                    currentEmotionMessage: "측정 완료!",
+                    emotions: lastEmotion.emotions,
+                }));
+            }
             setSecondStatus(3);
-            timeoutRef.current = null; // 사용 완료 후 초기화
+            timeoutRef.current = null;
 
             setTimeout(() => {
                 videoRef2.current?.scrollIntoView({
