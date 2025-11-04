@@ -28,14 +28,14 @@ export default function Header({ user, total }) {
         <>
             <div className="header">
                 {/* Emotion Care 타이틀 */}
-                <img src="/이모션 로고-Photoroom.png" alt="Emotion Care 로고" style={{ height: "100px" }} className="header-logo" />
+                <img src="/이모션 로고-Photoroom.png" alt="Emotion Care 로고"  className="header-logo" />
                 {/* <h1 className="emotion-care-title">
                     <span className="emotion-bold">Emotion</span>{" "}
                     <span className="Care-regular">Care</span>
                 </h1> */}
-                <h1 className="emotion-care-title">
+                {/* <h1 className="emotion-care-title">
                     <span className="emotion-bold">Emotion</span> <span className="Care-regular">Care</span>
-                </h1>
+                </h1> */}
                 <p style={{ fontSize: "1.1em", opacity: "1", marginBottom: "15px", color: "#1f2937", fontWeight: "600" }}>단계별로 완성하며
                     감정의 변화를 확인해보세요!</p>
 

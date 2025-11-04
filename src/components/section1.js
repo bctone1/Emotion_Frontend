@@ -371,6 +371,7 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user,
                     const sorted = Object.entries(emotions).sort((a, b) => b[1] - a[1]);
                     const maxEmotion = sorted[0][0];
                     const confidence = Math.round(sorted[0][1] * 100);
+                    const finalConfidence = Math.max(confidence, 60);
 
                     // 👉 ref에 최신 감정 저장
                     latestEmotionRef.current = {
@@ -380,13 +381,49 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user,
                     };
 
                     // (선택) UI 실시간 표시
-                    setFirstEmotionDisplay(prev => ({
-                        ...prev,
-                        currentEmotionEmoji: emotionEmojiMap(maxEmotion),
-                        currentEmotionName: emotionLabelMap(maxEmotion),
-                        confidence,
-                        currentEmotionMessage: "얼굴이 감지되었습니다!",
-                    }));
+                    if (PuzzleStatus === 2) {
+                        setFirstEmotionDisplay({
+                            ...firstEmotionDisplay,
+                            currentEmotionEmoji: emotionEmojiMap(sorted[0][0]),
+                            currentEmotionName: emotionLabelMap(sorted[0][0]),
+                            confidence: confidence,
+                            currentEmotionMessage: "얼굴이 감지되었습니다!",
+                            emotions: {
+                                happy: emotions.happy,
+                                sad: emotions.sad,
+                                angry: emotions.angry,
+                                neutral: emotions.neutral,
+                                surprised: emotions.surprised,
+                                fearful: emotions.fearful,
+                                disgusted: emotions.disgusted,
+                                confused: emotions.confused || 0
+                            }
+                        });
+
+                    } else {
+                        updateDetectionMetrics({ detectionSuccess: true, confidence: finalConfidence });
+
+                        setSecondEmotionDisplay({
+                            ...SecondEmotionDisplay,
+                            currentEmotionEmoji: emotionEmojiMap(sorted[0][0]),
+                            currentEmotionName: emotionLabelMap(sorted[0][0]),
+                            confidence: confidence,
+                            currentEmotionMessage: "얼굴이 감지되었습니다!",
+                            emotions: {
+                                happy: emotions.happy,
+                                sad: emotions.sad,
+                                angry: emotions.angry,
+                                neutral: emotions.neutral,
+                                surprised: emotions.surprised,
+                                fearful: emotions.fearful,
+                                disgusted: emotions.disgusted,
+                                confused: emotions.confused || 0
+                            }
+                        });
+                    }
+
+
+                    console.log("현재 감정:", sorted[0][0], " (확률:", sorted[0][1].toFixed(2), ")");
                 }
             } catch (err) {
                 console.error("얼굴 감지 오류:", err);
