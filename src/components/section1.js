@@ -472,7 +472,7 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user,
                 behavior: "smooth",
                 block: "start",
             });
-        }, 300);
+        }, 200);
 
         setfirstStatus(int);
 
@@ -517,13 +517,19 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user,
                     behavior: "smooth",
                     block: "start",
                 });
-            }, 300);
+            }, 200);
 
-        }, 3000);
+        }, 5000);
     };
 
 
     const measureSecondEmotion = (int) => {
+        setTimeout(() => {
+            ScrollWrap.current?.scrollIntoView({
+                behavior: "smooth",
+                block: "start",
+            });
+        }, 200);
         setSecondStatus(int);
         if (int === 1) {
             // interval 정리
@@ -544,11 +550,6 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user,
             startEmotionDetection({ video: videoRef2.current, canvas: canvasRef2.current });
         }
 
-        videoRef2.current?.scrollIntoView({
-            behavior: "smooth",
-            block: "start",
-        });
-
         timeoutRef.current = setTimeout(() => {
             if (intervalRef.current) {
                 clearInterval(intervalRef.current);
@@ -562,7 +563,15 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user,
 
             setSecondStatus(3);
             timeoutRef.current = null; // 사용 완료 후 초기화
-        }, 3000);
+
+            setTimeout(() => {
+                videoRef2.current?.scrollIntoView({
+                    behavior: "smooth",
+                    block: "start",
+                });
+            }, 200);
+
+        }, 5000);
     };
 
 
