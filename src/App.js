@@ -7,7 +7,7 @@ import "../src/index.css"
 import { useState, useEffect, useRef } from 'react';
 
 function App() {
-  const [PuzzleStatus, setPuzzleStatus] = useState(1);
+  const [PuzzleStatus, setPuzzleStatus] = useState(2);
 
   const [total, settotal] = useState({
     total_users: null,
@@ -104,6 +104,8 @@ function App() {
       .catch((err) => console.error("IP 가져오기 실패:", err));
   }, []);
 
+  const ScrollWrap = useRef(null);
+
 
 
   return (
@@ -112,10 +114,10 @@ function App() {
       <div className="container">
         <Header user={user} total={total} />
 
-        <div className="main-puzzle-container">
+        <div className="main-puzzle-container" ref={ScrollWrap}>
           <Puzzle PuzzleStatus={PuzzleStatus} />
 
-          <Section PuzzleStatus={PuzzleStatus} setPuzzleStatus={setPuzzleStatus} setUser={setUser} user={user} />
+          <Section PuzzleStatus={PuzzleStatus} setPuzzleStatus={setPuzzleStatus} setUser={setUser} user={user} ScrollWrap={ScrollWrap} />
         </div>
 
       </div>

@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useMemo } from 'react';
 import * as faceapi from "@vladmandic/face-api";
 
 
-export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user }) {
+export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user, ScrollWrap }) {
 
     const videoRef = useRef(null);
     const videoRef2 = useRef(null);
@@ -465,7 +465,15 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user 
 
     const timeoutRef = useRef(null); // ✅ 추가
 
+
     const measureFirstEmotion = (int) => {
+        setTimeout(() => {
+            ScrollWrap.current?.scrollIntoView({
+                behavior: "smooth",
+                block: "start",
+            });
+        }, 300);
+
         setfirstStatus(int);
 
         if (int === 1) {
@@ -487,10 +495,7 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user 
             startEmotionDetection({ video: videoRef.current, canvas: canvasRef.current });
         }
 
-        videoRef.current?.scrollIntoView({
-            behavior: "smooth",
-            block: "start",
-        });
+
 
         // ✅ timeoutRef로 저장
         timeoutRef.current = setTimeout(() => {
@@ -506,6 +511,14 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user 
 
             setfirstStatus(3);
             timeoutRef.current = null; // 사용 완료 후 초기화
+
+            setTimeout(() => {
+                videoRef.current?.scrollIntoView({
+                    behavior: "smooth",
+                    block: "start",
+                });
+            }, 300);
+
         }, 3000);
     };
 
@@ -703,10 +716,19 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user 
 
     const contentRef = useRef(null);
 
+    const firstContentRef = useRef(null);
+
 
     return (
         <>
-            <div className="current-step" id="currentStepText" style={{ cursor: "pointer", display: `${PuzzleStatus === 1 ? "" : "none"}` }}>
+            <div className="current-step" id="currentStepText" style={{ cursor: "pointer", display: `${PuzzleStatus === 1 ? "" : "none"}` }}
+                onClick={() => {
+                    firstContentRef.current?.scrollIntoView({
+                        behavior: "smooth",
+                        block: "start",
+                    });
+                }}
+            >
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "15px" }}>
                     <span>1단계: 감정 측정을 위한 준비를 시작해보세요!</span>
                     <span style={{ fontSize: "0.8em", animation: "bounce 2s infinite" }}>⬇️</span>
@@ -715,7 +737,9 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user 
 
             {/* 1단계: 준비 */}
             <div className={`step-content ${PuzzleStatus === 1 ? "active" : ""}`} id="step1">
-                <div className="preparation-step" style={{ padding: "25px" }}>
+                <div className="preparation-step" style={{ padding: "25px" }}
+                    ref={firstContentRef}
+                >
                     {/* 2열 그리드 레이아웃  */}
                     <div style={{
                         display: "grid",
@@ -732,7 +756,8 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user 
                                 borderRadius: "20px",
                                 padding: "20px",
                                 textAlign: "cen"
-                            }}>
+                            }}
+                        >
                             <div style={{ fontSize: "2.8em", marginBottom: "8px" }}>📷</div>
                             <h3 style={{ ontSize: "1.5em", marginBottom: "8px", color: "#0c4a6e" }}>카메라 준비하기</h3>
                             <p style={{ fontSize: "0.95em", color: " #0369a1", marginBottom: "20px" }}>
@@ -859,15 +884,6 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user 
                         </div>
 
                     </div>
-
-
-
-
-
-
-
-
-
                     {/* 하단 버튼  */}
                     <div style={{ textAlign: "center" }}>
                         <button
@@ -878,15 +894,10 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user 
                         </button>
                     </div>
                 </div>
-
-
-
-
             </div >
 
             {/* 2단계: 첫 번째 감정 측정 */}
-            < div className={`step-content ${PuzzleStatus === 2 ? "active" : ""}`
-            } id="step2" >
+            < div className={`step-content ${PuzzleStatus === 2 ? "active" : ""}`} id="step2">
                 <div className="webcam-section">
                     <h3
                         style={{
