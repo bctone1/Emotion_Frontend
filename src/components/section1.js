@@ -265,8 +265,8 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user 
         setLoading(true);
         try {
             //수정 전 URL
-            const MODEL_URL = "https://cdn.jsdelivr.net/npm/@vladmandic/face-api@latest/model/";
-            // const MODEL_URL = "https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/";
+            // const MODEL_URL = "https://cdn.jsdelivr.net/npm/@vladmandic/face-api@latest/model/";
+            const MODEL_URL = "https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/";
             await Promise.all([
                 // 수정 전 모델
                 // faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
@@ -315,8 +315,14 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user 
             if (!modelsLoaded) return;
 
             try {
+                const DETECTION_OPTIONS = new faceapi.SsdMobilenetv1Options({
+                    minConfidence: 0.5,  // 최소 신뢰도 (0.5 = 50%)
+                    maxResults: 10       // 최대 감지 얼굴 수
+                });
+
                 const detections = await faceapi
-                    .detectAllFaces(video, new faceapi.TinyFaceDetectorOptions())
+                    // .detectAllFaces(video, new faceapi.TinyFaceDetectorOptions()) //수정 전 모델
+                    .detectAllFaces(video, DETECTION_OPTIONS)
                     .withFaceLandmarks()
                     .withFaceExpressions();
 
