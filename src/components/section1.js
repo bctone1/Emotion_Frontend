@@ -510,7 +510,7 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user 
             }
 
             setSecondEmotionDisplay({
-                ...firstEmotionDisplay,
+                ...SecondEmotionDisplay,
                 currentEmotionMessage: "측정 완료!",
             });
 
