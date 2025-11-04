@@ -333,21 +333,17 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user,
         canvas.height = displaySize.height;
         const ctx = canvas.getContext("2d");
 
-        // 기존 interval 제거
-        if (intervalRef.current) clearInterval(intervalRef.current);
-
         let isRunning = true;
-        intervalRef.current = true; // 측정 중 표시
 
-        const detectLoop = async () => {
+        const DETECTION_OPTIONS = new faceapi.SsdMobilenetv1Options({
+            minConfidence: 0.5,
+            maxResults: 10
+        });
+
+        async function detect() {
             if (!isRunning || !modelsLoaded) return;
 
             try {
-                const DETECTION_OPTIONS = new faceapi.SsdMobilenetv1Options({
-                    minConfidence: 0.5,
-                    maxResults: 10,
-                });
-
                 const detections = await faceapi
                     .detectAllFaces(video, DETECTION_OPTIONS)
                     .withFaceLandmarks()
@@ -359,66 +355,29 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user,
                 if (resizedDetections.length > 0) {
                     const detection = resizedDetections[0];
                     const box = detection.detection.box;
-
-                    // 얼굴 테두리
                     ctx.strokeStyle = "#00FF00";
                     ctx.lineWidth = 2;
                     ctx.strokeRect(box.x, box.y, box.width, box.height);
 
-                    // 랜드마크
-                    const landmarks = detection.landmarks;
-                    ctx.fillStyle = "#FF0000";
-                    landmarks.positions.forEach((p) => {
-                        ctx.beginPath();
-                        ctx.arc(p.x, p.y, 2, 0, 2 * Math.PI);
-                        ctx.fill();
-                    });
-
-                    // 감정 처리
                     const emotions = detection.expressions;
                     const sorted = Object.entries(emotions).sort((a, b) => b[1] - a[1]);
-                    const maxValue = sorted[0][1];
-                    const confidence = Math.round(maxValue * 100);
+                    const confidence = Math.round(sorted[0][1] * 100);
 
-                    const updateEmotionState = (setDisplay) =>
-                        setDisplay((prev) => ({
-                            ...prev,
-                            currentEmotionEmoji: emotionEmojiMap(sorted[0][0]),
-                            currentEmotionName: emotionLabelMap(sorted[0][0]),
-                            confidence,
-                            currentEmotionMessage: "얼굴이 감지되었습니다!",
-                            emotions: {
-                                happy: emotions.happy,
-                                sad: emotions.sad,
-                                angry: emotions.angry,
-                                neutral: emotions.neutral,
-                                surprised: emotions.surprised,
-                                fearful: emotions.fearful,
-                                disgusted: emotions.disgusted,
-                                confused: emotions.confused || 0,
-                            },
-                        }));
-
-                    if (PuzzleStatus === 2) updateEmotionState(setFirstEmotionDisplay);
-                    else updateEmotionState(setSecondEmotionDisplay);
-
-                } else {
-                    // 얼굴 감지 X 시
-                    setFirstEmotionDisplay((prev) => ({
+                    setFirstEmotionDisplay(prev => ({
                         ...prev,
-                        currentEmotionEmoji: "😐",
-                        currentEmotionName: "감지 중...",
-                        currentEmotionMessage: "얼굴을 카메라 앞에 위치시켜주세요",
-                        confidence: 0,
+                        currentEmotionEmoji: emotionEmojiMap(sorted[0][0]),
+                        currentEmotionName: emotionLabelMap(sorted[0][0]),
+                        confidence: confidence,
+                        currentEmotionMessage: "얼굴이 감지되었습니다!",
                         emotions: {
-                            happy: 0,
-                            sad: 0,
-                            angry: 0,
-                            neutral: 0,
-                            surprised: 0,
-                            fearful: 0,
-                            disgusted: 0,
-                            confused: 0,
+                            happy: emotions.happy,
+                            sad: emotions.sad,
+                            angry: emotions.angry,
+                            neutral: emotions.neutral,
+                            surprised: emotions.surprised,
+                            fearful: emotions.fearful,
+                            disgusted: emotions.disgusted,
+                            confused: emotions.confused || 0,
                         },
                     }));
                 }
@@ -426,19 +385,19 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user,
                 console.error("얼굴 감지 오류:", err);
             }
 
-            // 다음 프레임 예약 (setInterval 대신 requestAnimationFrame)
-            if (isRunning) requestAnimationFrame(detectLoop);
-        };
+            // 다음 프레임으로 루프 계속
+            if (isRunning) requestAnimationFrame(detect);
+        }
 
-        detectLoop(); // 루프 시작
+        detect();
 
-        // stop 함수: 외부에서 호출 가능하도록 반환
+        // stop 함수 반환
         return () => {
             isRunning = false;
-            intervalRef.current = null;
-            console.log("🔴 감정 감지 중지됨");
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
         };
     }
+
 
 
 
@@ -478,8 +437,7 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user,
 
     const timeoutRef = useRef(null); // ✅ 추가
 
-
-    const measureFirstEmotion = (int) => {
+    const measureFirstEmotion = async (int) => {
         setTimeout(() => {
             ScrollWrap.current?.scrollIntoView({
                 behavior: "smooth",
@@ -489,14 +447,13 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user,
 
         setfirstStatus(int);
 
+        // 중지 시
         if (int === 1) {
-            // interval 정리
-            if (intervalRef.current) {
-                clearInterval(intervalRef.current);
-                intervalRef.current = null;
+            if (stopDetectionRef.current) {
+                stopDetectionRef.current();
+                stopDetectionRef.current = null;
             }
 
-            // ✅ timeout 정리
             if (timeoutRef.current) {
                 clearTimeout(timeoutRef.current);
                 timeoutRef.current = null;
@@ -504,26 +461,28 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user,
             return;
         }
 
+        // 시작 시
         if (videoRef.current && modelsLoaded) {
-            startEmotionDetection({ video: videoRef.current, canvas: canvasRef.current });
+            stopDetectionRef.current = await startEmotionDetection({
+                video: videoRef.current,
+                canvas: canvasRef.current,
+            });
         }
 
-
-
-        // ✅ timeoutRef로 저장
+        // 5초 뒤 자동 종료
         timeoutRef.current = setTimeout(() => {
-            if (intervalRef.current) {
-                clearInterval(intervalRef.current);
-                intervalRef.current = null;
+            if (stopDetectionRef.current) {
+                stopDetectionRef.current();
+                stopDetectionRef.current = null;
             }
 
-            setFirstEmotionDisplay({
-                ...firstEmotionDisplay,
+            setFirstEmotionDisplay(prev => ({
+                ...prev,
                 currentEmotionMessage: "측정 완료!",
-            });
+            }));
 
             setfirstStatus(3);
-            timeoutRef.current = null; // 사용 완료 후 초기화
+            timeoutRef.current = null;
 
             setTimeout(() => {
                 videoRef.current?.scrollIntoView({
@@ -531,9 +490,9 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user,
                     block: "start",
                 });
             }, 200);
-
         }, 5000);
     };
+
 
 
     const measureSecondEmotion = (int) => {
