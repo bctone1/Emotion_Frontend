@@ -352,6 +352,21 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user,
 
                 if (resizedDetections.length > 0) {
                     const detection = resizedDetections[0];
+
+                    const box = detection.detection.box;
+                    ctx.strokeStyle = '#00FF00'; // 박스 색상
+                    ctx.lineWidth = 2;           // 박스 두께
+                    ctx.strokeRect(box.x, box.y, box.width, box.height);
+
+                    // 랜드마크 그리기
+                    const landmarks = detection.landmarks;
+                    ctx.fillStyle = '#FF0000'; // 점 색상
+                    landmarks.positions.forEach(point => {
+                        ctx.beginPath();
+                        ctx.arc(point.x, point.y, 2, 0, 2 * Math.PI); // 점 크기
+                        ctx.fill();
+                    });
+
                     const emotions = detection.expressions;
                     const sorted = Object.entries(emotions).sort((a, b) => b[1] - a[1]);
                     const maxEmotion = sorted[0][0];
