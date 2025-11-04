@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import * as faceapi from "@vladmandic/face-api";
 
 
@@ -397,28 +397,8 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user 
                             }
                         });
                     }
-
-
                     console.log("현재 감정:", sorted[0][0], " (확률:", sorted[0][1].toFixed(2), ")");
-                } else {
-                    setFirstEmotionDisplay({
-                        currentEmotionEmoji: "😐",
-                        currentEmotionName: "감지 중...",
-                        currentEmotionMessage: "얼굴을 카메라 앞에 위치시켜주세요",
-                        confidence: 0,
-                        emotions: { // 각 감정별 확률
-                            happy: 0,
-                            sad: 0,
-                            angry: 0,
-                            neutral: 0,
-                            surprised: 0,
-                            fearful: 0,
-                            disgusted: 0,
-                            confused: 0
-                        }
-                    });
                 }
-
             } catch (err) {
                 console.error("얼굴 감지 오류:", err);
             }
@@ -431,11 +411,11 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user 
         currentEmotionName: "중립",
         currentEmotionMessage: "자연스러운 표정으로 화면을 보고 있어주세요",
         confidence: 0,
-        emotions: { // 각 감정별 확률
+        emotions: {
             happy: 0,
             sad: 0,
             angry: 0,
-            neutral: 70,
+            neutral: 0,
             surprised: 0,
             fearful: 0,
             disgusted: 0,
@@ -447,36 +427,45 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user 
         currentEmotionEmoji: "😐",
         currentEmotionName: "중립",
         currentEmotionMessage: "자연스러운 표정으로 화면을 보고 있어주세요",
-        confidence: 0,
-        emotions: { // 각 감정별 확률
+        confidence: 80,
+        emotions: {
             happy: 0,
             sad: 0,
             angry: 0,
             neutral: 0,
-            surprised: 70,
+            surprised: 0,
             fearful: 0,
             disgusted: 0,
             confused: 0
         }
     });
 
+    const timeoutRef = useRef(null); // ✅ 추가
 
     const measureFirstEmotion = (int) => {
         setfirstStatus(int);
-        if (int === 1) return;
-        // 상태 초기화 (optional)
-        setFirstEmotionDisplay({
-            ...firstEmotionDisplay,
-            currentEmotionEmoji: "😐",
-            currentEmotionName: "감지 중...",
-            currentEmotionMessage: "자연스러운 표정으로 화면을 보고 있어주세요",
-        });
-        // interval 재시작
+
+        if (int === 1) {
+            // interval 정리
+            if (intervalRef.current) {
+                clearInterval(intervalRef.current);
+                intervalRef.current = null;
+            }
+
+            // ✅ timeout 정리
+            if (timeoutRef.current) {
+                clearTimeout(timeoutRef.current);
+                timeoutRef.current = null;
+            }
+            return;
+        }
+
         if (videoRef.current && modelsLoaded) {
             startEmotionDetection({ video: videoRef.current, canvas: canvasRef.current });
         }
 
-        setTimeout(() => {
+        // ✅ timeoutRef로 저장
+        timeoutRef.current = setTimeout(() => {
             if (intervalRef.current) {
                 clearInterval(intervalRef.current);
                 intervalRef.current = null;
@@ -484,41 +473,49 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user 
 
             setFirstEmotionDisplay({
                 ...firstEmotionDisplay,
-                currentEmotionMessage: "측정 완료!"
+                currentEmotionMessage: "측정 완료!",
             });
 
-            setfirstStatus(3); // 완료 상태
+            setfirstStatus(3);
+            timeoutRef.current = null; // 사용 완료 후 초기화
         }, 3000);
     };
 
+
     const measureSecondEmotion = (int) => {
         setSecondStatus(int);
-        if (int === 1) return;
+        if (int === 1) {
+            // interval 정리
+            if (intervalRef.current) {
+                clearInterval(intervalRef.current);
+                intervalRef.current = null;
+            }
 
-        // 상태 초기화 (optional)
-        setSecondEmotionDisplay({
-            ...SecondEmotionDisplay,
-            currentEmotionMessage: "측정 중...",
-            currentEmotionEmoji: "😐",
-            currentEmotionName: "감지 중..."
-        });
+            // ✅ timeout 정리
+            if (timeoutRef.current) {
+                clearTimeout(timeoutRef.current);
+                timeoutRef.current = null;
+            }
+            return;
+        }
 
         if (videoRef.current && modelsLoaded) {
             startEmotionDetection({ video: videoRef2.current, canvas: canvasRef2.current });
         }
 
-        setTimeout(() => {
+        timeoutRef.current = setTimeout(() => {
             if (intervalRef.current) {
                 clearInterval(intervalRef.current);
                 intervalRef.current = null;
             }
 
             setSecondEmotionDisplay({
-                ...SecondEmotionDisplay,
-                currentEmotionMessage: "측정 완료!"
+                ...firstEmotionDisplay,
+                currentEmotionMessage: "측정 완료!",
             });
 
-            setSecondStatus(3); // 완료 상태
+            setSecondStatus(3);
+            timeoutRef.current = null; // 사용 완료 후 초기화
         }, 3000);
     };
 
@@ -644,6 +641,22 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user 
         }
     }
 
+    let emotionChanged = firstEmotionDisplay.currentEmotionName !== SecondEmotionDisplay.currentEmotionName;
+    const confidenceChange = useMemo(() => {
+        if (!firstEmotionDisplay?.confidence || !SecondEmotionDisplay?.confidence) return 0;
+        return SecondEmotionDisplay.confidence - firstEmotionDisplay.confidence;
+    }, [firstEmotionDisplay, SecondEmotionDisplay]);
+
+    // 색상 및 메시지 결정
+    const { borderColor, description } = useMemo(() => {
+        if (confidenceChange > 0) {
+            return { borderColor: "#10b981", description: "신뢰도가 증가했습니다" };
+        } else if (confidenceChange < 0) {
+            return { borderColor: "#ef4444", description: "신뢰도가 감소했습니다" };
+        } else {
+            return { borderColor: "#6b7280", description: "신뢰도가 동일합니다" };
+        }
+    }, [confidenceChange]);
 
 
     return (
@@ -1357,7 +1370,6 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user 
                     <h3 style={{ fontSize: "1.8em", marginBottom: "20px", color: "#1f2937", textAlign: "center", }}>
                         감정 변화 통계 분석
                     </h3>
-
                     <div className="stats-grid">
 
                         {/* 측정 전 */}
@@ -1381,12 +1393,13 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user 
                         </div>
 
 
+
                         {/* 감정 변화 */}
-                        <div className="stat-card">
+                        <div className="stat-card" style={{ borderColor: `${emotionChanged ? "#10b981" : "#f59e0b"}` }}>
                             <div className="stat-icon">🔄</div>
                             <div className="stat-title">감정 변화</div>
                             <div className="card-stat-value">
-                                {firstEmotionDisplay.currentEmotionName === SecondEmotionDisplay.currentEmotionName
+                                {emotionChanged
                                     ? "감정 유지"
                                     : `${firstEmotionDisplay.currentEmotionName} → ${SecondEmotionDisplay.currentEmotionName}`}
                             </div>
@@ -1396,27 +1409,21 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user 
                                     : "감정이 변화했습니다"}
                             </div>
                         </div>
-
                         {/* 신뢰도 변화 */}
-                        <div className="stat-card">
+                        <div className="stat-card" style={{ borderColor }}>
                             <div className="stat-icon">📈</div>
                             <div className="stat-title">신뢰도 변화</div>
-                            <div className="card-stat-value">
-                                {SecondEmotionDisplay.confidence - firstEmotionDisplay.confidence > 0
-                                    ? `+${SecondEmotionDisplay.confidence - firstEmotionDisplay.confidence}%`
-                                    : `${SecondEmotionDisplay.confidence - firstEmotionDisplay.confidence}%`}
+                            <div className="card-stat-value" id="confidenceChangeValue">
+                                {confidenceChange > 0
+                                    ? `+${confidenceChange}%`
+                                    : `${confidenceChange}%`}
                             </div>
-                            <div className="stat-description">
-                                {SecondEmotionDisplay.confidence - firstEmotionDisplay.confidence > 0
-                                    ? "신뢰도가 증가했습니다"
-                                    : SecondEmotionDisplay.confidence - firstEmotionDisplay.confidence < 0
-                                        ? "신뢰도가 감소했습니다"
-                                        : "신뢰도가 동일합니다"}
+                            <div className="stat-description" id="confidenceChangeDesc">
+                                {description}
                             </div>
                         </div>
 
                     </div>
-
 
                     <div
                         id="finalAnalysis"
@@ -1433,16 +1440,7 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user 
                     >
                         {finalAnalysis}
                     </div>
-
                 </div>
-
-                {/* 정량적 지표 평가 섹션 */}
-                {/* <div className="statistics-section" style={{ border: "3px solid #8b5cf6", background: "linear-gradient(145deg, #faf5ff, #f3e8ff)", }}>
-                    <h3 style={{ fontSize: "2.5em", marginBottom: "30px", color: "#7c3aed", textAlign: "center", }}>
-                        📊 정량적 성능 지표 (KPI)
-                    </h3>
-                    {updateKPIDisplay()}
-                </div> */}
 
                 <div style={{ textAlign: "center", marginTop: "40px" }}>
                     <button
