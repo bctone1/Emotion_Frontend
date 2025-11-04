@@ -1297,6 +1297,7 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user,
                                 setPuzzleStatus(5);
                                 create_emotion_data(1);
                                 create_kpi_data({ user });
+                                setTimeout(() => ScrollWrap.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 200);
                             }}
                         >
                             결과 확인
