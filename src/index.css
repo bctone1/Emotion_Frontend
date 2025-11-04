@@ -95,14 +95,14 @@
    margin: 0 auto 20px auto;
    /* 로고와 타이틀 사이 간격 */
  }
-
- /* @media (max-width: 768px) {
+/* 
+ @media (max-width: 768px) {
    .header-logo {
      width: 70px;
      height: 70px;
      margin-bottom: 15px;
    }
- } */
+ }
 
  @media (min-width: 1441px) {
    .header-logo {
@@ -110,7 +110,7 @@
      height: 120px;
      margin-bottom: 25px;
    }
- }
+ } */
 
  .emotion-bold {
    font-family: 'Pretendard';
