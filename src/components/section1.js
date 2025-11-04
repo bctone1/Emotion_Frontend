@@ -265,8 +265,8 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user 
         setLoading(true);
         try {
             //수정 전 URL
-            // const MODEL_URL = "https://cdn.jsdelivr.net/npm/@vladmandic/face-api@latest/model/";
-            const MODEL_URL = "https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/";
+            const MODEL_URL = "https://cdn.jsdelivr.net/npm/@vladmandic/face-api@latest/model/";
+            // const MODEL_URL = "https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/";
             await Promise.all([
                 // 수정 전 모델
                 // faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
