@@ -381,8 +381,8 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user,
 
 
                     if (PuzzleStatus === 2) {
-                        setFirstEmotionDisplay({
-                            ...firstEmotionDisplay,
+                        setFirstEmotionDisplay(prev => ({
+                            ...prev,
                             currentEmotionEmoji: emotionEmojiMap(sorted[0][0]),
                             currentEmotionName: emotionLabelMap(sorted[0][0]),
                             confidence: confidence,
@@ -397,13 +397,13 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user,
                                 disgusted: emotions.disgusted,
                                 confused: emotions.confused || 0
                             }
-                        });
+                        }));
 
                     } else {
                         updateDetectionMetrics({ detectionSuccess: true, confidence: finalConfidence });
 
-                        setSecondEmotionDisplay({
-                            ...SecondEmotionDisplay,
+                        setSecondEmotionDisplay(prev => ({
+                            ...prev,
                             currentEmotionEmoji: emotionEmojiMap(sorted[0][0]),
                             currentEmotionName: emotionLabelMap(sorted[0][0]),
                             confidence: confidence,
@@ -418,7 +418,7 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user,
                                 disgusted: emotions.disgusted,
                                 confused: emotions.confused || 0
                             }
-                        });
+                        }));
                     }
                     console.log("현재 감정:", sorted[0][0], " (확률:", sorted[0][1].toFixed(2), ")");
                 }
