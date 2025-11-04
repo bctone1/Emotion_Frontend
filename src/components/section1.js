@@ -12,6 +12,23 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user 
     const [modelsLoaded, setModelsLoaded] = useState(false);
     const [loading, setLoading] = useState(true);
 
+    const totaltime = () => {
+        const end = Date.now();
+        const start = new Date(user.startTime).getTime(); // user.startTime이 Date나 ISO 문자열이라면 변환
+        const diffMs = end - start;
+
+        // 밀리초 → 초
+        const totalSec = Math.floor(diffMs / 1000);
+        const minutes = Math.floor(totalSec / 60);
+        const seconds = totalSec % 60;
+
+        // ✅ 두 자리수 포맷
+        const mm = String(minutes).padStart(2, "0");
+        const ss = String(seconds).padStart(2, "0");
+
+        return `${mm}:${ss}`;
+    };
+
     const emotionContent = {
         '슬픔': {
             icon: '🌊',
@@ -427,7 +444,7 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user 
         currentEmotionEmoji: "😐",
         currentEmotionName: "중립",
         currentEmotionMessage: "자연스러운 표정으로 화면을 보고 있어주세요",
-        confidence: 80,
+        confidence: 0,
         emotions: {
             happy: 0,
             sad: 0,
@@ -571,28 +588,42 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user 
         }
     };
 
+    const isPositiveEmotionChange = (from, to) => {
+        const positiveEmotions = ['행복', '중립'];
+        const negativeEmotions = ['슬픔', '화남', '두려움', '역겨움', '혼란'];
 
+        if (negativeEmotions.includes(from) && positiveEmotions.includes(to)) {
+            return true;
+        }
+        if (from === '중립' && to === '행복') {
+            return true;
+        }
+        return false;
+    }
 
+    const emotionChanged = firstEmotionDisplay.currentEmotionName !== SecondEmotionDisplay.currentEmotionName;
+    const confidenceChange = SecondEmotionDisplay.confidence - firstEmotionDisplay.confidence;
 
-
+    // const confidenceChange = useMemo(() => {
+    //     if (!firstEmotionDisplay?.confidence || !SecondEmotionDisplay?.confidence) return 0;
+    //     return SecondEmotionDisplay.confidence - firstEmotionDisplay.confidence;
+    // }, [firstEmotionDisplay, SecondEmotionDisplay]);
 
     useEffect(() => {
         // 감정 비교 로직 (예시)
-        const emotionChanged =
-            firstEmotionDisplay.currentEmotionName !==
-            SecondEmotionDisplay.currentEmotionName;
-
-        const confidenceChange =
-            SecondEmotionDisplay.confidence - firstEmotionDisplay.confidence;
-
         let analysisMessage = "";
         if (emotionChanged) {
-            analysisMessage = `${firstEmotionDisplay.currentEmotionName} → ${SecondEmotionDisplay.currentEmotionName} 감정 변화가 있었습니다.`;
+            if (isPositiveEmotionChange(firstEmotionDisplay.currentEmotionName, SecondEmotionDisplay.currentEmotionName)) {
+                analysisMessage = `✨ 콘텐츠 감상을 통해 ${firstEmotionDisplay.currentEmotionName}에서 ${SecondEmotionDisplay.currentEmotionName}으로 긍정적인 감정 변화가 관찰되었습니다!`;
+            } else {
+                analysisMessage = `${firstEmotionDisplay.currentEmotionName}에서 ${SecondEmotionDisplay.currentEmotionName}으로 감정이 변화했습니다. 다양한 감정을 경험하는 것도 의미있는 과정입니다.`;
+            }
         } else {
-            analysisMessage =
-                confidenceChange >= 0
-                    ? `${firstEmotionDisplay.currentEmotionName} 감정이 유지되면서 신뢰도 ${confidenceChange}% 증가했습니다.`
-                    : `${firstEmotionDisplay.currentEmotionName} 감정이 일관되게 유지되었습니다.`;
+            if (confidenceChange > 0) {
+                analysisMessage = `🎯 ${firstEmotionDisplay.currentEmotionName} 감정이 유지되면서 신뢰도가 ${confidenceChange}% 증가했습니다. 감정이 더욱 안정적이 되었네요!`;
+            } else {
+                analysisMessage = `💚 ${firstEmotionDisplay.currentEmotionName} 감정이 일관되게 유지되었습니다. 감정의 안정성을 보여주는 좋은 결과입니다.`;
+            }
         }
         setFinalAnalysis(analysisMessage);
     }, [firstEmotionDisplay, SecondEmotionDisplay]);
@@ -641,11 +672,6 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user 
         }
     }
 
-    let emotionChanged = firstEmotionDisplay.currentEmotionName !== SecondEmotionDisplay.currentEmotionName;
-    const confidenceChange = useMemo(() => {
-        if (!firstEmotionDisplay?.confidence || !SecondEmotionDisplay?.confidence) return 0;
-        return SecondEmotionDisplay.confidence - firstEmotionDisplay.confidence;
-    }, [firstEmotionDisplay, SecondEmotionDisplay]);
 
     // 색상 및 메시지 결정
     const { borderColor, description } = useMemo(() => {
@@ -1357,7 +1383,7 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user 
                                 marginBottom: "6px",
                             }}
                         >
-                            총 소요 시간: <span id="totalTime">03:45</span>
+                            총 소요 시간 : <span id="totalTime">{totaltime()}</span>
                         </div>
                         <div style={{ fontSize: "0.9em", color: "#0369a1" }}>
                             측정 결과가 데이터베이스에 저장되었습니다
