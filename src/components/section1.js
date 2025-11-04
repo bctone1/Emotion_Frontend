@@ -230,6 +230,12 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user 
     const showContent = async (emotionName) => {
         setactualContentVisible(true)
         setVideocontent(actualEmotionContent[emotionName]);
+        setTimeout(() => {
+            contentRef.current?.scrollIntoView({
+                behavior: "smooth",
+                block: "start",
+            });
+        }, 200); // 0.2초 정도면 충분
 
         try {
             const response = await fetch(`${process.env.REACT_APP_API_URL}/content_interactions/create_content_data`, {
@@ -481,6 +487,11 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user 
             startEmotionDetection({ video: videoRef.current, canvas: canvasRef.current });
         }
 
+        videoRef.current?.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+        });
+
         // ✅ timeoutRef로 저장
         timeoutRef.current = setTimeout(() => {
             if (intervalRef.current) {
@@ -516,9 +527,14 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user 
             return;
         }
 
-        if (videoRef.current && modelsLoaded) {
+        if (videoRef2.current && modelsLoaded) {
             startEmotionDetection({ video: videoRef2.current, canvas: canvasRef2.current });
         }
+
+        videoRef2.current?.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+        });
 
         timeoutRef.current = setTimeout(() => {
             if (intervalRef.current) {
@@ -683,6 +699,9 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user 
             return { borderColor: "#6b7280", description: "신뢰도가 동일합니다" };
         }
     }, [confidenceChange]);
+
+
+    const contentRef = useRef(null);
 
 
     return (
@@ -1089,69 +1108,7 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user 
                         콘텐츠 감상 중
                     </h3>
 
-                    <div className="content-display" id="contentDisplay">
-                        {/* <div
-                            className={`stopped-screen ${isViewingStopped ? "" : "hidden"}`}
-                            style={{
-                                color: "white",
-                                textAlign: "center",
-                                padding: "40px",
-                                width: "100%",
-                                height: "100%",
-                                display: "flex",
-                                flexDirection: "column",
-                                justifyContent: "center",
-                                alignItems: "center",
-                            }}
-                        >
-                            <div className="stopped-icon" style={{ fontSize: "4em", marginBottom: "20px", animation: "stopPulse 2s ease-in-out infinite" }}>
-                                ℹ️
-                            </div>
-                            <div style={{ fontSize: "1.8em", fontWeight: "bold", marginBottom: "15px" }}>
-                                콘텐츠 감상이 중지되었습니다
-                            </div>
-                            <div style={{ fontSize: "1.2em", opacity: 0.8, marginBottom: "20px" }}>
-                                다시 감상하거나 다음 단계로 진행할 수 있습니다
-                            </div>
-                            <div style={{ display: "flex", gap: "15px", marginTop: "10px" }}>
-                                <button
-                                    onClick={() => {
-                                        if (contentVideoRef.current) contentVideoRef.current.play();
-                                        setIsViewingStopped(false);
-                                    }}
-                                    style={{
-                                        background: "linear-gradient(145deg, #10b981, #059669)",
-                                        color: "white",
-                                        border: "none",
-                                        padding: "12px 24px",
-                                        borderRadius: "10px",
-                                        cursor: "pointer",
-                                        fontWeight: "bold",
-                                        fontSize: "1.1em",
-                                    }}
-                                >
-                                    다시 감상하기
-                                </button>
-                                <button
-                                    onClick={() => setPuzzleStatus(4)} // 다음 단계
-                                    style={{
-                                        background: "linear-gradient(145deg, #6b7280, #4b5563)",
-                                        color: "white",
-                                        border: "none",
-                                        padding: "12px 24px",
-                                        borderRadius: "10px",
-                                        cursor: "pointer",
-                                        fontWeight: "bold",
-                                        fontSize: "1.1em",
-                                    }}
-                                >
-                                    다음 단계로
-                                </button>
-                            </div>
-                        </div> */}
-
-
-
+                    <div className="content-display" id="contentDisplay" ref={contentRef}>
                         <div className={`video-content ${isViewingStopped ? "hidden" : ""}`}>
                             <video
                                 className="video-player"
@@ -1163,11 +1120,9 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user 
                                 ref={contentVideoRef}
                             />
                         </div>
-
-
                     </div>
 
-                    <div className={`button-group ${isViewingStopped ? "hidden" : ""}`} style={{ textAlign: "center", marginTop: "30px" }}>
+                    <div className={`button-group ${isViewingStopped ? "hidden" : ""}`} style={{ textAlign: "center", marginTop: "30px" }} >
 
                         <button
                             className="video-control-btn"
@@ -1224,6 +1179,8 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user 
                         >
                             ✅ 감상 완료
                         </button>
+
+
                     </div>
                 </div>
             </div >
