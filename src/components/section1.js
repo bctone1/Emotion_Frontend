@@ -264,12 +264,20 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user 
     const loadModels = async () => {
         setLoading(true);
         try {
-            const MODEL_URL = "https://cdn.jsdelivr.net/npm/@vladmandic/face-api@latest/model/";
+            //수정 전 URL
+            // const MODEL_URL = "https://cdn.jsdelivr.net/npm/@vladmandic/face-api@latest/model/";
+            const MODEL_URL = "https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/";
             await Promise.all([
-                faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
+                // 수정 전 모델
+                // faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
+                // faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
+                // faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL),
+                // faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL),
+
+                faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL),
                 faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
                 faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL),
-                faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL),
+                faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL)
             ]);
             console.log("모든 모델이 로드되었습니다");
             setModelsLoaded(true);
