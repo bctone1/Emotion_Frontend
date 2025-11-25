@@ -329,6 +329,234 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user,
 
     const latestEmotionRef = useRef(null);
 
+
+
+    function generateExtraLandmarkPoints(positions, scaleX = 1, scaleY = 1) {
+        const extra = [];
+
+        // ========================================
+        // 개선된 전략: 박스 안에서만 포인트 생성
+        // 총 32개 포인트를 얼굴 인식 박스 내부에 배치
+        // ========================================
+
+        // 1. 이마 영역 추가 (12개) - 진짜 이마처럼 보이도록 배치
+        // 미간(27번)을 기준으로 이마 포인트 생성
+        const glabella = positions[27]; // 미간
+        const leftEyebrowInner = positions[17]; // 왼쪽 눈썹 안쪽
+        const leftEyebrowOuter = positions[21]; // 왼쪽 눈썹 바깥
+        const rightEyebrowInner = positions[26]; // 오른쪽 눈썹 안쪽
+        const rightEyebrowOuter = positions[22]; // 오른쪽 눈썹 바깥
+
+        // 이마의 평균 Y 위치 계산 (눈썹들의 평균)
+        const eyebrowAvgY = (leftEyebrowInner.y + rightEyebrowInner.y) / 2;
+
+        // 이마 중앙 라인 (5개) - 미간에서 훨씬 위로
+        for (let i = 1; i <= 5; i++) {
+            extra.push({
+                x: glabella.x * scaleX,
+                y: (glabella.y - (i * 8)) * scaleY  // 간격을 더 넓게 (5→8)
+            });
+        }
+
+        // 이마 좌측 라인 (3개) - 눈썹에서 훨씬 위로
+        const leftForeheadX1 = leftEyebrowInner.x + (glabella.x - leftEyebrowInner.x) * 0.3;
+        const leftForeheadX2 = leftEyebrowInner.x + (glabella.x - leftEyebrowInner.x) * 0.15;
+        const leftForeheadX3 = leftEyebrowOuter.x;
+
+        extra.push({
+            x: leftForeheadX1 * scaleX,
+            y: (eyebrowAvgY - 15) * scaleY  // 15픽셀 위
+        });
+
+        extra.push({
+            x: leftForeheadX2 * scaleX,
+            y: (eyebrowAvgY - 25) * scaleY  // 25픽셀 위 (더 높게)
+        });
+
+        extra.push({
+            x: leftForeheadX3 * scaleX,
+            y: (eyebrowAvgY - 20) * scaleY  // 20픽셀 위
+        });
+
+        // 이마 우측 라인 (4개) - 눈썹에서 훨씬 위로
+        const rightForeheadX1 = rightEyebrowInner.x - (rightEyebrowInner.x - glabella.x) * 0.3;
+        const rightForeheadX2 = rightEyebrowInner.x - (rightEyebrowInner.x - glabella.x) * 0.15;
+        const rightForeheadX3 = rightEyebrowOuter.x;
+        const rightForeheadX4 = rightEyebrowOuter.x + 8;
+
+        extra.push({
+            x: rightForeheadX1 * scaleX,
+            y: (eyebrowAvgY - 15) * scaleY  // 15픽셀 위
+        });
+
+        extra.push({
+            x: rightForeheadX2 * scaleX,
+            y: (eyebrowAvgY - 25) * scaleY  // 25픽셀 위 (더 높게)
+        });
+
+        extra.push({
+            x: rightForeheadX3 * scaleX,
+            y: (eyebrowAvgY - 20) * scaleY  // 20픽셀 위
+        });
+
+        extra.push({
+            x: rightForeheadX4 * scaleX,
+            y: (eyebrowAvgY - 15) * scaleY  // 15픽셀 위
+        });
+
+        // 2. 턱선 세밀화 (8개) - 턱선 따라서만 (박스 안)
+        // 중요 구간의 중간점 추가 (명확히 8개)
+        const jawPairs = [
+            [0, 1],   // 왼쪽 턱 1
+            [2, 3],   // 왼쪽 턱 2
+            [4, 5],   // 왼쪽 턱 3
+            [6, 7],   // 왼쪽 아래턱 1
+            [8, 9],   // 정면 턱
+            [9, 10],  // 오른쪽 아래턱 1
+            [12, 13], // 오른쪽 턱 2
+            [14, 15]  // 오른쪽 턱 3
+        ];
+
+        jawPairs.forEach(([idx1, idx2]) => {
+            extra.push({
+                x: (positions[idx1].x + positions[idx2].x) / 2 * scaleX,
+                y: (positions[idx1].y + positions[idx2].y) / 2 * scaleY
+            });
+        });
+
+        // 3. 눈 주변 상세화 (8개 - 각 눈 4개씩)
+        // 왼쪽 눈 (36-41)
+        const leftEye = positions.slice(36, 42);
+
+        // 위 눈꺼풀 중앙
+        extra.push({
+            x: (leftEye[1].x + leftEye[2].x) / 2 * scaleX,
+            y: (Math.min(leftEye[1].y, leftEye[2].y) - 1) * scaleY  // 2 → 1로 축소
+        });
+
+        // 아래 눈꺼풀 중앙
+        extra.push({
+            x: (leftEye[4].x + leftEye[5].x) / 2 * scaleX,
+            y: (Math.max(leftEye[4].y, leftEye[5].y) + 1) * scaleY  // 2 → 1로 축소
+        });
+
+        // 눈 안쪽 상세
+        extra.push({
+            x: (leftEye[0].x - 1) * scaleX,  // 2 → 1로 축소
+            y: leftEye[0].y * scaleY
+        });
+
+        // 눈 바깥쪽 상세
+        extra.push({
+            x: (leftEye[3].x + 1) * scaleX,  // 2 → 1로 축소
+            y: leftEye[3].y * scaleY
+        });
+
+        // 오른쪽 눈 (42-47)
+        const rightEye = positions.slice(42, 48);
+
+        // 위 눈꺼풀 중앙
+        extra.push({
+            x: (rightEye[1].x + rightEye[2].x) / 2 * scaleX,
+            y: (Math.min(rightEye[1].y, rightEye[2].y) - 1) * scaleY  // 2 → 1로 축소
+        });
+
+        // 아래 눈꺼풀 중앙
+        extra.push({
+            x: (rightEye[4].x + rightEye[5].x) / 2 * scaleX,
+            y: (Math.max(rightEye[4].y, rightEye[5].y) + 1) * scaleY  // 2 → 1로 축소
+        });
+
+        // 눈 안쪽 상세
+        extra.push({
+            x: (rightEye[0].x - 1) * scaleX,  // 2 → 1로 축소
+            y: rightEye[0].y * scaleY
+        });
+
+        // 눈 바깥쪽 상세
+        extra.push({
+            x: (rightEye[3].x + 1) * scaleX,  // 2 → 1로 축소
+            y: rightEye[3].y * scaleY
+        });
+
+        // 4. 코 주변 확장 (4개) - 간격 축소
+        const noseTip = positions[30]; // 코끝
+        const leftNostril = positions[31]; // 왼쪽 콧방울
+        const rightNostril = positions[35]; // 오른쪽 콧방울
+
+        // 왼쪽 콧방울 상세
+        extra.push({
+            x: (leftNostril.x - 2) * scaleX,  // 3 → 2로 축소
+            y: leftNostril.y * scaleY
+        });
+
+        // 오른쪽 콧방울 상세
+        extra.push({
+            x: (rightNostril.x + 2) * scaleX,  // 3 → 2로 축소
+            y: rightNostril.y * scaleY
+        });
+
+        // 코끝 위
+        extra.push({
+            x: noseTip.x * scaleX,
+            y: (noseTip.y - 2) * scaleY  // 3 → 2로 축소
+        });
+
+        // 코끝 아래
+        extra.push({
+            x: noseTip.x * scaleX,
+            y: (noseTip.y + 2) * scaleY  // 3 → 2로 축소
+        });
+
+        // 총 32개: 이마(12) + 턱선(8) + 눈(8) + 코(4) = 32개
+        // ✅ 모든 포인트가 박스 안에 위치
+
+        // 디버그: 실제 개수 출력
+        console.log('🔢 추가 포인트 개수:', extra.length, '개 (목표: 32개)');
+        if (extra.length !== 32) {
+            console.warn('⚠️ 경고: 추가 포인트가', extra.length, '개입니다. 32개가 아닙니다!');
+        }
+
+        return extra;
+    }
+
+
+
+    function draw100LandmarkPoints(ctx, landmarks, scaleX, scaleY) {
+        const positions = landmarks.positions;
+
+        ctx.fillStyle = 'rgba(255, 0, 0, 0.9)';
+        positions.forEach(point => {
+            ctx.beginPath();
+            ctx.arc(
+                point.x * scaleX,
+                point.y * scaleY,
+                1,
+                0,
+                2 * Math.PI
+            );
+            ctx.fill();
+        });
+
+        const extraPoints = generateExtraLandmarkPoints(positions, scaleX, scaleY);
+
+        extraPoints.forEach(point => {
+            ctx.beginPath();
+            ctx.arc(
+                point.x,
+                point.y,
+                1,
+                0,
+                2 * Math.PI
+            );
+            ctx.fill();
+        });
+
+        const totalPoints = positions.length + extraPoints.length;
+        console.log('📊 총 포인트:', totalPoints, '개 (원본:', positions.length, '+ 추가:', extraPoints.length, ')');
+    }
+
+
     async function startEmotionDetection({ video, canvas }) {
         const displaySize = { width: video.videoWidth, height: video.videoHeight };
         canvas.width = displaySize.width;
@@ -367,17 +595,12 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user,
                         box.width * scaleX,
                         box.height * scaleY
                     );
-
                     const landmarks = detection.landmarks;
                     // ctx.fillStyle = '#fbbf24';
                     ctx.fillStyle = 'rgba(255, 0, 0, 0.9)';
-
-                    // CSS 스케일링을 고려한 점 크기 계산
-                    // canvas의 실제 크기와 표시 크기의 비율을 계산
                     const canvasDisplayWidth = canvas.offsetWidth || canvas.width;
                     const canvasDisplayHeight = canvas.offsetHeight || canvas.height;
                     const scaleRatio = Math.min(canvasDisplayWidth / canvas.width, canvasDisplayHeight / canvas.height);
-                    // HTML에서 1로 설정된 점 크기를 CSS 스케일 비율에 맞게 조정
                     const pointSize = 1 / scaleRatio;
 
                     landmarks.positions.forEach(point => {
@@ -391,6 +614,8 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user,
                         );
                         ctx.fill();
                     });
+
+                    draw100LandmarkPoints(ctx, landmarks, scaleX, scaleY);
 
                     const emotions = detection.expressions;
                     const sorted = Object.entries(emotions).sort((a, b) => b[1] - a[1]);
