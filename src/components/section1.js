@@ -371,14 +371,26 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user,
                     const landmarks = detection.landmarks;
                     // ctx.fillStyle = '#fbbf24';
                     ctx.fillStyle = 'rgba(255, 0, 0, 0.9)';
+
+                    // CSS 스케일링을 고려한 점 크기 계산
+                    // canvas의 실제 크기와 표시 크기의 비율을 계산
+                    const canvasDisplayWidth = canvas.offsetWidth || canvas.width;
+                    const canvasDisplayHeight = canvas.offsetHeight || canvas.height;
+                    const scaleRatio = Math.min(canvasDisplayWidth / canvas.width, canvasDisplayHeight / canvas.height);
+                    // HTML에서 1로 설정된 점 크기를 CSS 스케일 비율에 맞게 조정
+                    const pointSize = 1 / scaleRatio;
+
                     landmarks.positions.forEach(point => {
                         ctx.beginPath();
-                        // ctx.arc(point.x, point.y, 1.5, 0, 2 * Math.PI);
-                        ctx.arc(point.x * scaleX, point.y * scaleY, 0.25, 0, 2 * Math.PI);
+                        ctx.arc(
+                            point.x * scaleX,
+                            point.y * scaleY,
+                            pointSize,
+                            0,
+                            2 * Math.PI
+                        );
                         ctx.fill();
                     });
-
-
 
                     const emotions = detection.expressions;
                     const sorted = Object.entries(emotions).sort((a, b) => b[1] - a[1]);
