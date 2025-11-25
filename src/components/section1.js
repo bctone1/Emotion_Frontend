@@ -596,26 +596,30 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user,
                         box.height * scaleY
                     );
                     const landmarks = detection.landmarks;
-                    // ctx.fillStyle = '#fbbf24';
-                    ctx.fillStyle = 'rgba(255, 0, 0, 0.9)';
-                    const canvasDisplayWidth = canvas.offsetWidth || canvas.width;
-                    const canvasDisplayHeight = canvas.offsetHeight || canvas.height;
-                    const scaleRatio = Math.min(canvasDisplayWidth / canvas.width, canvasDisplayHeight / canvas.height);
-                    const pointSize = 1 / scaleRatio;
-
-                    landmarks.positions.forEach(point => {
-                        ctx.beginPath();
-                        ctx.arc(
-                            point.x * scaleX,
-                            point.y * scaleY,
-                            pointSize,
-                            0,
-                            2 * Math.PI
-                        );
-                        ctx.fill();
-                    });
-
                     draw100LandmarkPoints(ctx, landmarks, scaleX, scaleY);
+
+
+
+                    // ctx.fillStyle = '#fbbf24';
+                    // ctx.fillStyle = 'rgba(255, 0, 0, 0.9)';
+                    // const canvasDisplayWidth = canvas.offsetWidth || canvas.width;
+                    // const canvasDisplayHeight = canvas.offsetHeight || canvas.height;
+                    // const scaleRatio = Math.min(canvasDisplayWidth / canvas.width, canvasDisplayHeight / canvas.height);
+                    // const pointSize = 1 / scaleRatio;
+
+                    // landmarks.positions.forEach(point => {
+                    //     ctx.beginPath();
+                    //     ctx.arc(
+                    //         point.x * scaleX,
+                    //         point.y * scaleY,
+                    //         pointSize,
+                    //         0,
+                    //         2 * Math.PI
+                    //     );
+                    //     ctx.fill();
+                    // });
+
+
 
                     const emotions = detection.expressions;
                     const sorted = Object.entries(emotions).sort((a, b) => b[1] - a[1]);
