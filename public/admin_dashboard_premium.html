@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>감정 분석 시스템 - 관리자 대시보드</title>
+    <link rel="stylesheet" href="admin_styles_premium.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💙 Emotion Care | 관리자 대시보드</h1>
+            <p style="font-size: 1.3em; opacity: 0.9;">감정 분석 시스템 데이터 관리</p>
+            
+            <div class="admin-info">
+                <div>
+                    <span style="font-size: 1.4em; font-weight: bold; color: #fbbf24;">관리자 모드</span>
+                    <span style="margin-left: 30px; font-size: 1.2em; color: #0369a1;">
+                        접속 시간: <span id="currentTime" style="color: #667eea; font-weight: bold;">--:--</span>
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 통계 요약 섹션 -->
+        <div class="stats-summary">
+            <div class="summary-card">
+                <div class="summary-icon">👥</div>
+                <div class="summary-value" id="totalSessions">0</div>
+                <div class="summary-label">총 세션 수</div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-icon">😊</div>
+                <div class="summary-value" id="totalMeasurements">0</div>
+                <div class="summary-label">총 감정 측정</div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-icon">🎨</div>
+                <div class="summary-value" id="totalInteractions">0</div>
+                <div class="summary-label">콘텐츠 상호작용</div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-icon">📈</div>
+                <div class="summary-value" id="avgPerformance">0%</div>
+                <div class="summary-label">평균 성공률</div>
+            </div>
+        </div>
+
+        <!-- 데이터 테이블 섹션 -->
+        <div class="data-section active">
+            <!-- 탭 네비게이션 -->
+            <div class="tab-navigation">
+                <button class="tab-button active" onclick="showTable('sessions')">
+                    📋 세션 데이터
+                </button>
+                <button class="tab-button" onclick="showTable('measurements')">
+                    😊 감정 측정
+                </button>
+                <button class="tab-button" onclick="showTable('interactions')">
+                    🎨 콘텐츠 상호작용
+                </button>
+                <button class="tab-button" onclick="showTable('performance')">
+                    📊 성능 지표
+                </button>
+            </div>
+
+            <!-- 검색 및 필터 섹션 -->
+            <div class="filter-section">
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="데이터 검색..." onkeyup="filterTable()">
+                    <button onclick="filterTable()">🔍 검색</button>
+                </div>
+                <div class="filter-actions">
+                    <button onclick="exportToCSV()">📥 CSV 다운로드</button>
+                    <button onclick="refreshData()">🔄 새로고침</button>
+                    <select id="rowsPerPage" onchange="changeRowsPerPage()">
+                        <option value="10">10개씩 보기</option>
+                        <option value="25" selected>25개씩 보기</option>
+                        <option value="50">50개씩 보기</option>
+                        <option value="100">100개씩 보기</option>
+                        <option value="all">전체 보기</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- 세션 데이터 테이블 -->
+            <div class="table-container active" id="sessions-table">
+                <h3>📋 세션 데이터</h3>
+                <div class="table-info">
+                    <span>총 <strong id="sessions-count">0</strong>개의 레코드</span>
+                    <span id="sessions-filter-info"></span>
+                </div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th onclick="sortTable('sessions', 0)">세션 ID ↕</th>
+                                <th onclick="sortTable('sessions', 1)">사용자 IP ↕</th>
+                                <th onclick="sortTable('sessions', 2)">사용자 번호 ↕</th>
+                                <th onclick="sortTable('sessions', 3)">시작 시간 ↕</th>
+                                <th onclick="sortTable('sessions', 4)">종료 시간 ↕</th>
+                                <th onclick="sortTable('sessions', 5)">총 시간(초) ↕</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sessions-tbody">
+                            <!-- CSV 데이터가 여기에 로드됩니다 -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="pagination" id="sessions-pagination">
+                    <!-- 페이지네이션 버튼이 여기에 생성됩니다 -->
+                </div>
+            </div>
+
+            <!-- 감정 측정 데이터 테이블 -->
+            <div class="table-container" id="measurements-table">
+                <h3>😊 감정 측정 데이터</h3>
+                <div class="table-info">
+                    <span>총 <strong id="measurements-count">0</strong>개의 레코드</span>
+                    <span id="measurements-filter-info"></span>
+                </div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th onclick="sortTable('measurements', 0)">측정 ID ↕</th>
+                                <th onclick="sortTable('measurements', 1)">세션 ID ↕</th>
+                                <th onclick="sortTable('measurements', 2)">측정 유형 ↕</th>
+                                <th onclick="sortTable('measurements', 3)">감정명 ↕</th>
+                                <th onclick="sortTable('measurements', 4)">신뢰도(%) ↕</th>
+                                <th onclick="sortTable('measurements', 5)">측정 시간 ↕</th>
+                                <th onclick="sortTable('measurements', 6)">얼굴 감지 ↕</th>
+                            </tr>
+                        </thead>
+                        <tbody id="measurements-tbody">
+                            <!-- CSV 데이터가 여기에 로드됩니다 -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="pagination" id="measurements-pagination">
+                    <!-- 페이지네이션 버튼이 여기에 생성됩니다 -->
+                </div>
+            </div>
+
+            <!-- 콘텐츠 상호작용 데이터 테이블 -->
+            <div class="table-container" id="interactions-table">
+                <h3>🎨 콘텐츠 상호작용 데이터</h3>
+                <div class="table-info">
+                    <span>총 <strong id="interactions-count">0</strong>개의 레코드</span>
+                    <span id="interactions-filter-info"></span>
+                </div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th onclick="sortTable('interactions', 0)">상호작용 ID ↕</th>
+                                <th onclick="sortTable('interactions', 1)">세션 ID ↕</th>
+                                <th onclick="sortTable('interactions', 2)">추천 감정 ↕</th>
+                                <th onclick="sortTable('interactions', 3)">콘텐츠 유형 ↕</th>
+                                <th onclick="sortTable('interactions', 4)">콘텐츠 제목 ↕</th>
+                                <th onclick="sortTable('interactions', 5)">시청 완료 ↕</th>
+                                <th onclick="sortTable('interactions', 6)">조기 종료 ↕</th>
+                            </tr>
+                        </thead>
+                        <tbody id="interactions-tbody">
+                            <!-- CSV 데이터가 여기에 로드됩니다 -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="pagination" id="interactions-pagination">
+                    <!-- 페이지네이션 버튼이 여기에 생성됩니다 -->
+                </div>
+            </div>
+
+            <!-- 성능 지표 데이터 테이블 -->
+            <div class="table-container" id="performance-table">
+                <h3>📊 성능 지표 데이터</h3>
+                <div class="table-info">
+                    <span>총 <strong id="performance-count">0</strong>개의 레코드</span>
+                    <span id="performance-filter-info"></span>
+                </div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th onclick="sortTable('performance', 0)">지표 ID ↕</th>
+                                <th onclick="sortTable('performance', 1)">세션 ID ↕</th>
+                                <th onclick="sortTable('performance', 2)">얼굴 검출 정확도 ↕</th>
+                                <th onclick="sortTable('performance', 3)">평균 감정 신뢰도 ↕</th>
+                                <th onclick="sortTable('performance', 4)">유효 측정률 ↕</th>
+                                <th onclick="sortTable('performance', 5)">처리 시간(초) ↕</th>
+                                <th onclick="sortTable('performance', 6)">API 성공률 ↕</th>
+                            </tr>
+                        </thead>
+                        <tbody id="performance-tbody">
+                            <!-- CSV 데이터가 여기에 로드됩니다 -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="pagination" id="performance-pagination">
+                    <!-- 페이지네이션 버튼이 여기에 생성됩니다 -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="admin_script_fixed.js"></script>
+</body>
+</html>

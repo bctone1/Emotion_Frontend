@@ -344,7 +344,7 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user,
 
                 const detections = await faceapi
                     .detectAllFaces(video, DETECTION_OPTIONS)
-                    .withFaceLandmarks(faceapi.nets.faceLandmark68Net)
+                    .withFaceLandmarks()
                     .withFaceExpressions();
 
                 const resizedDetections = faceapi.resizeResults(detections, displaySize);
