@@ -354,18 +354,37 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user,
                     const detection = resizedDetections[0];
 
                     const box = detection.detection.box;
-                    ctx.strokeStyle = '#3b82f6'; // 박스 색상 (파란색)
-                    ctx.lineWidth = 3;           // 박스 두께
-                    ctx.strokeRect(box.x, box.y, box.width, box.height);
+                    // ctx.strokeStyle = '#3b82f6';
+                    ctx.strokeStyle = '#00FF00';
+                    ctx.lineWidth = 3;
 
-                    // 랜드마크 그리기
+                    const scaleX = canvas.width / video.videoWidth;
+                    const scaleY = canvas.height / video.videoHeight;
+                    // ctx.strokeRect(box.x, box.y, box.width, box.height);
+                    ctx.strokeRect(
+                        box.x * scaleX,
+                        box.y * scaleY,
+                        box.width * scaleX,
+                        box.height * scaleY
+                    );
+
                     const landmarks = detection.landmarks;
-                    ctx.fillStyle = '#fbbf24'; // 점 색상 (노란색)
+                    // ctx.fillStyle = '#fbbf24';
+                    ctx.fillStyle = 'rgba(255, 0, 0, 0.9)';
                     landmarks.positions.forEach(point => {
                         ctx.beginPath();
-                        ctx.arc(point.x, point.y, 1.5, 0, 2 * Math.PI); // 점 크기
+                        // ctx.arc(point.x, point.y, 1.5, 0, 2 * Math.PI);
+                        ctx.arc(point.x * scaleX, point.y * scaleY, 1, 0, 2 * Math.PI);
                         ctx.fill();
                     });
+
+
+
+
+
+
+
+
 
                     const emotions = detection.expressions;
                     const sorted = Object.entries(emotions).sort((a, b) => b[1] - a[1]);
