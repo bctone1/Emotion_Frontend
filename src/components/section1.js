@@ -525,46 +525,13 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user,
     function draw100LandmarkPoints(ctx, landmarks, scaleX, scaleY) {
         const positions = landmarks.positions; // ✅ positions 변수 정의
 
-        ctx.fillStyle = '#fbbf24';
+        // 1. 실제 68개 특징점 그리기 (빨간색, 반지름 1)
         ctx.fillStyle = 'rgba(255, 0, 0, 0.9)';
-        const canvasDisplayWidth = ctx.canvas.offsetWidth || ctx.canvas.width;
-        const canvasDisplayHeight = ctx.canvas.offsetHeight || ctx.canvas.height;
-        const scaleRatio = Math.min(canvasDisplayWidth / ctx.canvas.width, canvasDisplayHeight / ctx.canvas.height);
-        const pointSize = 1 / scaleRatio;
-
         positions.forEach(point => {
             ctx.beginPath();
             ctx.arc(
                 point.x * scaleX,
                 point.y * scaleY,
-                pointSize,
-                0,
-                2 * Math.PI
-            );
-            ctx.fill();
-        });
-
-        // const positions = landmarks.positions;
-        // ctx.fillStyle = 'rgba(255, 0, 0, 0.9)';
-        // positions.forEach(point => {
-        //     ctx.beginPath();
-        //     ctx.arc(
-        //         point.x * scaleX,
-        //         point.y * scaleY,
-        //         1,
-        //         0,
-        //         2 * Math.PI
-        //     );
-        //     ctx.fill();
-        // });
-
-        const extraPoints = generateExtraLandmarkPoints(positions, scaleX, scaleY);
-
-        extraPoints.forEach(point => {
-            ctx.beginPath();
-            ctx.arc(
-                point.x,
-                point.y,
                 1,
                 0,
                 2 * Math.PI
@@ -572,6 +539,23 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user,
             ctx.fill();
         });
 
+        // 2. 추가 32개 특징점 그리기
+        const extraPoints = generateExtraLandmarkPoints(positions, scaleX, scaleY);
+
+        ctx.fillStyle = 'rgba(255, 0, 0, 0.9)';
+        extraPoints.forEach(point => {
+            ctx.beginPath();
+            ctx.arc(
+                point.x,
+                point.y,
+                1,  // 추가 포인트도 반지름 1
+                0,
+                2 * Math.PI
+            );
+            ctx.fill();
+        });
+
+        // 디버그: 총 포인트 개수 표시
         const totalPoints = positions.length + extraPoints.length;
         console.log('📊 총 포인트:', totalPoints, '개 (원본:', positions.length, '+ 추가:', extraPoints.length, ')');
     }
@@ -617,29 +601,6 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user,
                     );
                     const landmarks = detection.landmarks;
                     draw100LandmarkPoints(ctx, landmarks, scaleX, scaleY);
-
-
-
-                    // ctx.fillStyle = '#fbbf24';
-                    // ctx.fillStyle = 'rgba(255, 0, 0, 0.9)';
-                    // const canvasDisplayWidth = canvas.offsetWidth || canvas.width;
-                    // const canvasDisplayHeight = canvas.offsetHeight || canvas.height;
-                    // const scaleRatio = Math.min(canvasDisplayWidth / canvas.width, canvasDisplayHeight / canvas.height);
-                    // const pointSize = 1 / scaleRatio;
-
-                    // landmarks.positions.forEach(point => {
-                    //     ctx.beginPath();
-                    //     ctx.arc(
-                    //         point.x * scaleX,
-                    //         point.y * scaleY,
-                    //         pointSize,
-                    //         0,
-                    //         2 * Math.PI
-                    //     );
-                    //     ctx.fill();
-                    // });
-
-
 
                     const emotions = detection.expressions;
                     const sorted = Object.entries(emotions).sort((a, b) => b[1] - a[1]);
