@@ -374,7 +374,7 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user,
                     landmarks.positions.forEach(point => {
                         ctx.beginPath();
                         // ctx.arc(point.x, point.y, 1.5, 0, 2 * Math.PI);
-                        ctx.arc(point.x * scaleX, point.y * scaleY, 0.5, 0, 2 * Math.PI);
+                        ctx.arc(point.x * scaleX, point.y * scaleY, 0.25, 0, 2 * Math.PI);
                         ctx.fill();
                     });
 
