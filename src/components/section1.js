@@ -354,16 +354,16 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user,
                     const detection = resizedDetections[0];
 
                     const box = detection.detection.box;
-                    ctx.strokeStyle = '#00FF00'; // 박스 색상
-                    ctx.lineWidth = 2;           // 박스 두께
+                    ctx.strokeStyle = '#3b82f6'; // 박스 색상 (파란색)
+                    ctx.lineWidth = 3;           // 박스 두께
                     ctx.strokeRect(box.x, box.y, box.width, box.height);
 
                     // 랜드마크 그리기
                     const landmarks = detection.landmarks;
-                    ctx.fillStyle = '#FF0000'; // 점 색상
+                    ctx.fillStyle = '#fbbf24'; // 점 색상 (노란색)
                     landmarks.positions.forEach(point => {
                         ctx.beginPath();
-                        ctx.arc(point.x, point.y, 2, 0, 2 * Math.PI); // 점 크기
+                        ctx.arc(point.x, point.y, 1.5, 0, 2 * Math.PI); // 점 크기
                         ctx.fill();
                     });
 
