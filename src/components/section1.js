@@ -523,15 +523,16 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user,
 
 
     function draw100LandmarkPoints(ctx, landmarks, scaleX, scaleY) {
+        const positions = landmarks.positions; // ✅ positions 변수 정의
 
         ctx.fillStyle = '#fbbf24';
         ctx.fillStyle = 'rgba(255, 0, 0, 0.9)';
-        const canvasDisplayWidth = canvas.offsetWidth || canvas.width;
-        const canvasDisplayHeight = canvas.offsetHeight || canvas.height;
-        const scaleRatio = Math.min(canvasDisplayWidth / canvas.width, canvasDisplayHeight / canvas.height);
+        const canvasDisplayWidth = ctx.canvas.offsetWidth || ctx.canvas.width;
+        const canvasDisplayHeight = ctx.canvas.offsetHeight || ctx.canvas.height;
+        const scaleRatio = Math.min(canvasDisplayWidth / ctx.canvas.width, canvasDisplayHeight / ctx.canvas.height);
         const pointSize = 1 / scaleRatio;
 
-        landmarks.positions.forEach(point => {
+        positions.forEach(point => {
             ctx.beginPath();
             ctx.arc(
                 point.x * scaleX,
