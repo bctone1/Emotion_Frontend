@@ -523,20 +523,39 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user,
 
 
     function draw100LandmarkPoints(ctx, landmarks, scaleX, scaleY) {
-        const positions = landmarks.positions;
 
+        ctx.fillStyle = '#fbbf24';
         ctx.fillStyle = 'rgba(255, 0, 0, 0.9)';
-        positions.forEach(point => {
+        const canvasDisplayWidth = canvas.offsetWidth || canvas.width;
+        const canvasDisplayHeight = canvas.offsetHeight || canvas.height;
+        const scaleRatio = Math.min(canvasDisplayWidth / canvas.width, canvasDisplayHeight / canvas.height);
+        const pointSize = 1 / scaleRatio;
+
+        landmarks.positions.forEach(point => {
             ctx.beginPath();
             ctx.arc(
                 point.x * scaleX,
                 point.y * scaleY,
-                1,
+                pointSize,
                 0,
                 2 * Math.PI
             );
             ctx.fill();
         });
+
+        // const positions = landmarks.positions;
+        // ctx.fillStyle = 'rgba(255, 0, 0, 0.9)';
+        // positions.forEach(point => {
+        //     ctx.beginPath();
+        //     ctx.arc(
+        //         point.x * scaleX,
+        //         point.y * scaleY,
+        //         1,
+        //         0,
+        //         2 * Math.PI
+        //     );
+        //     ctx.fill();
+        // });
 
         const extraPoints = generateExtraLandmarkPoints(positions, scaleX, scaleY);
 
