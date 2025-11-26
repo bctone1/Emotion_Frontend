@@ -348,13 +348,6 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user,
         // 2. 추가 32개 특징점 그리기
         const extraPoints = generateExtraLandmarkPoints(positions, scaleX, scaleY);
 
-        // 개발 모드: 주황색 / 시연 모드: 빨간색 (더 작게)
-        if (SHOW_DEBUG_COLORS) {
-            ctx.fillStyle = 'rgba(255, 0, 0, 0.9)';  // 주황색
-        } else {
-            ctx.fillStyle = 'rgba(255, 0, 0, 0.9)';    // 빨간색, 약간 투명
-        }
-
         extraPoints.forEach(point => {
             ctx.beginPath();
             ctx.arc(
