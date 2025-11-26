@@ -290,22 +290,37 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user,
             //수정 전 URL
             // const MODEL_URL = "https://cdn.jsdelivr.net/npm/@vladmandic/face-api@latest/model/";
             const MODEL_URL = "https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/";
-            await Promise.all([
-                // 수정 전 모델
-                // faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
-                // faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
-                // faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL),
-                // faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL),
-
-                faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL),
-                faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
-                faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL),
-                faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL)
-            ]);
-            console.log("모든 모델이 로드되었습니다");
-            setModelsLoaded(true);
+            
+            console.log("모델 로딩 시작...");
+            
+            // ✅ 각 모델을 순차적으로 로드하고 확인
+            await faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL);
+            console.log("✅ ssdMobilenetv1 로드 완료");
+            
+            await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
+            console.log("✅ faceLandmark68Net 로드 완료");
+            
+            await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL);
+            console.log("✅ faceRecognitionNet 로드 완료");
+            
+            await faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL);
+            console.log("✅ faceExpressionNet 로드 완료");
+            
+            // ✅ 모든 모델이 실제로 로드되었는지 최종 확인
+            if (faceapi.nets.ssdMobilenetv1.isLoaded && 
+                faceapi.nets.faceLandmark68Net.isLoaded && 
+                faceapi.nets.faceRecognitionNet.isLoaded && 
+                faceapi.nets.faceExpressionNet.isLoaded) {
+                console.log("✅ 모든 모델이 성공적으로 로드되었습니다");
+                setModelsLoaded(true);
+            } else {
+                throw new Error("모델 로드 확인 실패: 일부 모델이 로드되지 않았습니다");
+            }
         } catch (error) {
+            console.error("❌ 모델 로딩 오류:", error);
+            console.error("오류 상세:", error.message);
             setModelsLoaded(false);
+            alert("모델 로딩에 실패했습니다. 페이지를 새로고침해주세요.");
         } finally {
             setLoading(false);
         }
@@ -313,7 +328,16 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user,
 
     // 카메라와 모델이 준비됐다면 감정분석 시작
     useEffect(() => {
+        // ✅ 모델이 실제로 로드되었는지 확인
         if (!modelsLoaded) return;
+        
+        if (!faceapi.nets.ssdMobilenetv1.isLoaded || 
+            !faceapi.nets.faceLandmark68Net.isLoaded || 
+            !faceapi.nets.faceRecognitionNet.isLoaded || 
+            !faceapi.nets.faceExpressionNet.isLoaded) {
+            console.log("모델 로딩 대기 중...");
+            return;
+        }
 
         if (PuzzleStatus === 2 && videoRef.current) {
             startEmotionDetection({ video: videoRef.current, canvas: canvasRef.current });
@@ -569,7 +593,17 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user,
 
         if (intervalRef.current) clearInterval(intervalRef.current);
         intervalRef.current = setInterval(async () => {
+            // ✅ 모델이 실제로 로드되었는지 명시적으로 확인
             if (!modelsLoaded) return;
+            
+            // ✅ 각 모델이 실제로 로드되었는지 확인
+            if (!faceapi.nets.ssdMobilenetv1.isLoaded || 
+                !faceapi.nets.faceLandmark68Net.isLoaded || 
+                !faceapi.nets.faceRecognitionNet.isLoaded || 
+                !faceapi.nets.faceExpressionNet.isLoaded) {
+                console.log("모델 로딩 대기 중...");
+                return;
+            }
 
             try {
                 const DETECTION_OPTIONS = new faceapi.SsdMobilenetv1Options({ minConfidence: 0.5, maxResults: 10 });
@@ -713,8 +747,16 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user,
             return;
         }
 
-        if (videoRef.current && modelsLoaded) {
+        // ✅ 모델이 실제로 로드되었는지 확인
+        if (videoRef.current && modelsLoaded && 
+            faceapi.nets.ssdMobilenetv1.isLoaded && 
+            faceapi.nets.faceLandmark68Net.isLoaded && 
+            faceapi.nets.faceRecognitionNet.isLoaded && 
+            faceapi.nets.faceExpressionNet.isLoaded) {
             startEmotionDetection({ video: videoRef.current, canvas: canvasRef.current });
+        } else {
+            console.warn("모델이 아직 로드되지 않았습니다. 대기 중...");
+            setfirstStatus(1);
         }
 
         timeoutRef.current = setTimeout(() => {
@@ -757,8 +799,16 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user,
             return;
         }
 
-        if (videoRef2.current && modelsLoaded) {
+        // ✅ 모델이 실제로 로드되었는지 확인
+        if (videoRef2.current && modelsLoaded && 
+            faceapi.nets.ssdMobilenetv1.isLoaded && 
+            faceapi.nets.faceLandmark68Net.isLoaded && 
+            faceapi.nets.faceRecognitionNet.isLoaded && 
+            faceapi.nets.faceExpressionNet.isLoaded) {
             startEmotionDetection({ video: videoRef2.current, canvas: canvasRef2.current });
+        } else {
+            console.warn("모델이 아직 로드되지 않았습니다. 대기 중...");
+            setSecondStatus(1);
         }
 
         timeoutRef.current = setTimeout(() => {
