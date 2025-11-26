@@ -290,22 +290,37 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user,
             //수정 전 URL
             // const MODEL_URL = "https://cdn.jsdelivr.net/npm/@vladmandic/face-api@latest/model/";
             const MODEL_URL = "https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/";
-            await Promise.all([
-                // 수정 전 모델
-                // faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
-                // faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
-                // faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL),
-                // faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL),
-
-                faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL),
-                faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
-                faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL),
-                faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL)
-            ]);
-            console.log("모든 모델이 로드되었습니다");
-            setModelsLoaded(true);
+            
+            console.log("모델 로딩 시작...");
+            
+            // ✅ 각 모델을 순차적으로 로드하고 확인
+            await faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL);
+            console.log("✅ ssdMobilenetv1 로드 완료");
+            
+            await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
+            console.log("✅ faceLandmark68Net 로드 완료");
+            
+            await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL);
+            console.log("✅ faceRecognitionNet 로드 완료");
+            
+            await faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL);
+            console.log("✅ faceExpressionNet 로드 완료");
+            
+            // ✅ 모든 모델이 실제로 로드되었는지 최종 확인
+            if (faceapi.nets.ssdMobilenetv1.isLoaded && 
+                faceapi.nets.faceLandmark68Net.isLoaded && 
+                faceapi.nets.faceRecognitionNet.isLoaded && 
+                faceapi.nets.faceExpressionNet.isLoaded) {
+                console.log("✅ 모든 모델이 성공적으로 로드되었습니다");
+                setModelsLoaded(true);
+            } else {
+                throw new Error("모델 로드 확인 실패: 일부 모델이 로드되지 않았습니다");
+            }
         } catch (error) {
+            console.error("❌ 모델 로딩 오류:", error);
+            console.error("오류 상세:", error.message);
             setModelsLoaded(false);
+            alert("모델 로딩에 실패했습니다. 페이지를 새로고침해주세요.");
         } finally {
             setLoading(false);
         }
@@ -313,7 +328,16 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user,
 
     // 카메라와 모델이 준비됐다면 감정분석 시작
     useEffect(() => {
+        // ✅ 모델이 실제로 로드되었는지 확인
         if (!modelsLoaded) return;
+        
+        if (!faceapi.nets.ssdMobilenetv1.isLoaded || 
+            !faceapi.nets.faceLandmark68Net.isLoaded || 
+            !faceapi.nets.faceRecognitionNet.isLoaded || 
+            !faceapi.nets.faceExpressionNet.isLoaded) {
+            console.log("모델 로딩 대기 중...");
+            return;
+        }
 
         if (PuzzleStatus === 2 && videoRef.current) {
             startEmotionDetection({ video: videoRef.current, canvas: canvasRef.current });
@@ -324,53 +348,12 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user,
         }
 
     }, [modelsLoaded, PuzzleStatus]);
+
     const intervalRef = useRef(null);
+
     const latestEmotionRef = useRef(null);
 
 
-    function draw100LandmarkPoints(ctx, landmarks, scaleX, scaleY) {
-        const positions = landmarks.positions;
-
-        // 1. 실제 68개 특징점 그리기 (빨간색, 약간 크게)
-        ctx.fillStyle = 'rgba(255, 0, 0, 0.9)';
-        positions.forEach(point => {
-            ctx.beginPath();
-            ctx.arc(
-                point.x * scaleX,
-                point.y * scaleY,
-                1,
-                0,
-                2 * Math.PI
-            );
-            ctx.fill();
-        });
-
-        // 2. 추가 32개 특징점 그리기
-        const extraPoints = generateExtraLandmarkPoints(positions, scaleX, scaleY);
-
-        // 개발 모드: 주황색 / 시연 모드: 빨간색 (더 작게)
-        if (SHOW_DEBUG_COLORS) {
-            ctx.fillStyle = 'rgba(255, 0, 0, 0.9)';  // 주황색
-        } else {
-            ctx.fillStyle = 'rgba(255, 0, 0, 0.9)';    // 빨간색, 약간 투명
-        }
-
-        extraPoints.forEach(point => {
-            ctx.beginPath();
-            ctx.arc(
-                point.x,
-                point.y,
-                1,  // 2 → 1로 축소 (추가 포인트는 더 작게)
-                0,
-                2 * Math.PI
-            );
-            ctx.fill();
-        });
-
-        // 디버그: 총 포인트 개수 표시
-        const totalPoints = positions.length + extraPoints.length;
-        console.log('📊 총 포인트:', totalPoints, '개 (원본:', positions.length, '+ 추가:', extraPoints.length, ')');
-    }
 
     function generateExtraLandmarkPoints(positions, scaleX = 1, scaleY = 1) {
         const extra = [];
@@ -563,6 +546,44 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user,
 
 
 
+    function draw100LandmarkPoints(ctx, landmarks, scaleX, scaleY) {
+        const positions = landmarks.positions; // ✅ positions 변수 정의
+
+        // 1. 실제 68개 특징점 그리기 (빨간색, 반지름 1)
+        ctx.fillStyle = 'rgba(255, 0, 0, 0.9)';
+        positions.forEach(point => {
+            ctx.beginPath();
+            ctx.arc(
+                point.x * scaleX,
+                point.y * scaleY,
+                1,
+                0,
+                2 * Math.PI
+            );
+            ctx.fill();
+        });
+
+        // 2. 추가 32개 특징점 그리기
+        const extraPoints = generateExtraLandmarkPoints(positions, scaleX, scaleY);
+
+        ctx.fillStyle = 'rgba(255, 0, 0, 0.9)';
+        extraPoints.forEach(point => {
+            ctx.beginPath();
+            ctx.arc(
+                point.x,
+                point.y,
+                1,  // 추가 포인트도 반지름 1
+                0,
+                2 * Math.PI
+            );
+            ctx.fill();
+        });
+
+        // 디버그: 총 포인트 개수 표시
+        const totalPoints = positions.length + extraPoints.length;
+        console.log('📊 총 포인트:', totalPoints, '개 (원본:', positions.length, '+ 추가:', extraPoints.length, ')');
+    }
+
 
     async function startEmotionDetection({ video, canvas }) {
         const displaySize = { width: video.videoWidth, height: video.videoHeight };
@@ -572,14 +593,24 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user,
 
         if (intervalRef.current) clearInterval(intervalRef.current);
         intervalRef.current = setInterval(async () => {
+            // ✅ 모델이 실제로 로드되었는지 명시적으로 확인
             if (!modelsLoaded) return;
+            
+            // ✅ 각 모델이 실제로 로드되었는지 확인
+            if (!faceapi.nets.ssdMobilenetv1.isLoaded || 
+                !faceapi.nets.faceLandmark68Net.isLoaded || 
+                !faceapi.nets.faceRecognitionNet.isLoaded || 
+                !faceapi.nets.faceExpressionNet.isLoaded) {
+                console.log("모델 로딩 대기 중...");
+                return;
+            }
 
             try {
                 const DETECTION_OPTIONS = new faceapi.SsdMobilenetv1Options({ minConfidence: 0.5, maxResults: 10 });
 
                 const detections = await faceapi
                     .detectAllFaces(video, DETECTION_OPTIONS)
-                    .withFaceLandmarks()
+                    .withFaceLandmarks(faceapi.nets.faceLandmark68Net)
                     .withFaceExpressions();
 
                 const resizedDetections = faceapi.resizeResults(detections, displaySize);
@@ -589,23 +620,21 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user,
                     const detection = resizedDetections[0];
 
                     const box = detection.detection.box;
-                    ctx.strokeStyle = '#00FF00'; // 박스 색상
-                    ctx.lineWidth = 3;           // 박스 두께
-                    ctx.strokeRect(box.x, box.y, box.width, box.height);
+                    // ctx.strokeStyle = '#3b82f6';
+                    ctx.strokeStyle = '#00FF00';
+                    ctx.lineWidth = 3;
 
-                    // 랜드마크 그리기
                     const scaleX = canvas.width / video.videoWidth;
                     const scaleY = canvas.height / video.videoHeight;
+                    // ctx.strokeRect(box.x, box.y, box.width, box.height);
+                    ctx.strokeRect(
+                        box.x * scaleX,
+                        box.y * scaleY,
+                        box.width * scaleX,
+                        box.height * scaleY
+                    );
                     const landmarks = detection.landmarks;
                     draw100LandmarkPoints(ctx, landmarks, scaleX, scaleY);
-
-                    // const landmarks = detection.landmarks;
-                    // ctx.fillStyle = 'rgba(255, 0, 0, 0.9)'; // 점 색상
-                    // landmarks.positions.forEach(point => {
-                    //     ctx.beginPath();
-                    //     ctx.arc(point.x, point.y, 1, 0, 2 * Math.PI); // 점 크기
-                    //     ctx.fill();
-                    // });
 
                     const emotions = detection.expressions;
                     const sorted = Object.entries(emotions).sort((a, b) => b[1] - a[1]);
@@ -718,8 +747,16 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user,
             return;
         }
 
-        if (videoRef.current && modelsLoaded) {
+        // ✅ 모델이 실제로 로드되었는지 확인
+        if (videoRef.current && modelsLoaded && 
+            faceapi.nets.ssdMobilenetv1.isLoaded && 
+            faceapi.nets.faceLandmark68Net.isLoaded && 
+            faceapi.nets.faceRecognitionNet.isLoaded && 
+            faceapi.nets.faceExpressionNet.isLoaded) {
             startEmotionDetection({ video: videoRef.current, canvas: canvasRef.current });
+        } else {
+            console.warn("모델이 아직 로드되지 않았습니다. 대기 중...");
+            setfirstStatus(1);
         }
 
         timeoutRef.current = setTimeout(() => {
@@ -762,8 +799,16 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user,
             return;
         }
 
-        if (videoRef2.current && modelsLoaded) {
+        // ✅ 모델이 실제로 로드되었는지 확인
+        if (videoRef2.current && modelsLoaded && 
+            faceapi.nets.ssdMobilenetv1.isLoaded && 
+            faceapi.nets.faceLandmark68Net.isLoaded && 
+            faceapi.nets.faceRecognitionNet.isLoaded && 
+            faceapi.nets.faceExpressionNet.isLoaded) {
             startEmotionDetection({ video: videoRef2.current, canvas: canvasRef2.current });
+        } else {
+            console.warn("모델이 아직 로드되지 않았습니다. 대기 중...");
+            setSecondStatus(1);
         }
 
         timeoutRef.current = setTimeout(() => {
@@ -1813,4 +1858,95 @@ async function add_session_end_time(user) {
         console.error("서버 요청 오류:", err);
     }
 
+}
+
+
+function updateKPIDisplay() {
+
+    const kpiData = calculateKPIScores();
+    const metrics = kpiData.metrics;
+    const evaluations = kpiData.evaluations;
+
+    const passedKPIs = Object.values(evaluations).filter(status =>
+        status === '적정 확률' || status === '목표 달성' || status === '서비스 정상'
+    ).length;
+
+
+    let summaryMessage = '';
+    if (passedKPIs === 5) {
+        summaryMessage = '모든 KPI 지표가 목표 기준을 충족하여 시스템이 우수한 성능으로 작동하고 있습니다.';
+    } else if (passedKPIs >= 3) {
+        summaryMessage = `${passedKPIs}/5개 KPI가 목표를 달성했습니다. 일부 지표에서 개선이 필요합니다.`;
+    } else {
+        summaryMessage = `${passedKPIs}/5개 KPI만 목표를 달성했습니다. 시스템 성능 개선이 필요합니다.`;
+    }
+    return (
+        <>
+
+            <div className="stats-grid">
+                <div className="stat-card">
+                    <div className="stat-icon">🎯</div>
+                    <div className="stat-title">얼굴 감출 정수</div>
+                    <div className="card-stat-value">{metrics.detection_score.toFixed(2)}</div>
+                    <div className="stat-description">목표 ≥ 0.7 ({evaluations.detection})</div>
+                </div>
+                <div className="stat-card">
+                    <div className="stat-icon">🎪</div>
+                    <div className="stat-title">감정 신뢰도</div>
+                    <div className="card-stat-value">{metrics.confidence_score.toFixed(2)}</div>
+                    <div className="stat-description">목표 ≥ 0.6 ({evaluations.confidence})</div>
+                </div>
+                <div className="stat-card">
+                    <div className="stat-icon">📈</div>
+                    <div className="stat-title">유효 측정률</div>
+                    <div className="card-stat-value">{Math.round(metrics.validity_rate * 100)}%</div>
+                    <div className="stat-description">목표 ≥ 70% ({evaluations.validity})</div>
+                </div>
+                <div className="stat-card">
+                    <div className="stat-icon">⚡</div>
+                    <div className="stat-title">처리 응답 시간</div>
+                    <div className="card-stat-value">{metrics.processing_time.toFixed(1)}초</div>
+                    <div className="stat-description">목표 ≤ 2초 ({evaluations.processing})</div>
+                </div>
+                <div className="stat-card">
+                    <div className="stat-icon">🌐</div>
+                    <div className="stat-title">API 성공률</div>
+                    <div className="card-stat-value">{Math.round(metrics.api_success_rate * 100)}%</div>
+                    <div className="stat-description">목표 ≥ 98% ({evaluations.api})</div>
+                </div>
+            </div>
+
+            <div
+                style={{
+                    textAlign: "center",
+                    margin: "30px 0",
+                    padding: "25px",
+                    background: "linear-gradient(145deg, #eff6ff, #dbeafe)",
+                    borderRadius: "15px",
+                    border: "3px solid #3b82f6",
+                }}
+            >
+                <h4
+                    style={{
+                        color: "#1e40af",
+                        fontSize: "1.4em",
+                        marginBottom: "15px",
+                    }}
+                >
+                    📋 종합 평가 결과
+                </h4>
+                <div
+                    id="kpiSummary"
+                    style={{
+                        color: "#1e3a8a",
+                        fontSize: "1.2em",
+                        lineHeight: "1.6",
+                    }}
+                >
+                    {summaryMessage}
+                </div>
+            </div>
+
+        </>
+    )
 }
