@@ -1411,7 +1411,14 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user,
                         <button
                             className="action-button primary-button"
                             id="finishViewingButton"
-                            onClick={() => setPuzzleStatus(4)}
+                            onClick={() => {
+                                if (contentVideoRef.current) {
+                                    contentVideoRef.current.pause();
+                                    contentVideoRef.current.currentTime = 0;
+                                }
+                                setIsPlaying(false);
+                                setPuzzleStatus(4);
+                            }}
                         >
                             ✅ 감상 완료
                         </button>
