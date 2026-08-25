@@ -1,6 +1,6 @@
-import axios from 'axios';
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import './AdminDashboard.css';
+import { api } from '../api';
 
 
 function AdminDashboard() {
@@ -25,30 +25,25 @@ function AdminDashboard() {
 
 
   const fetchSessionData = async () => {
-    const response = await axios.get(`${process.env.REACT_APP_API_URL}/session/completed_sessions?page=1&size=100`);
-    console.log(response.data);
-    setSessions(response.data);
+    const data = await api.getCompletedSessions();
+    setSessions(data);
   }
 
   const fetchMeasurementData = async () => {
-    const response = await axios.get(`${process.env.REACT_APP_API_URL}/emotion_measurements/getMeasurement?page=1&size=100`);
-    console.log(response.data);
-    setMeasurements(response.data);
+    const data = await api.getMeasurements();
+    setMeasurements(data);
   }
   const fetchInteractionData = async () => {
-    const response = await axios.get(`${process.env.REACT_APP_API_URL}/content_interactions/get_content_data?page=1&size=100`);
-    console.log(response.data);
-    setInteractions(response.data);
+    const data = await api.getContentData();
+    setInteractions(data);
   }
   const fetchPerformanceData = async () => {
-    const response = await axios.get(`${process.env.REACT_APP_API_URL}/performance_metrics/get_metrics_data?page=1&size=100`);
-    console.log(response.data);
-    setPerformance(response.data);
+    const data = await api.getMetricsData();
+    setPerformance(data);
   }
   const fetchAverage = async () => {
-    const response = await axios.get(`${process.env.REACT_APP_API_URL}/session/admin_dashboard`);
-    console.log(response.data);
-    setAverage(response.data);
+    const data = await api.getAdminDashboard();
+    setAverage(data);
   }
 
   useEffect(() => {

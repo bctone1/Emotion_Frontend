@@ -3,6 +3,7 @@ import Footer from "./footer";
 import Puzzle from "./puzzle ";
 import Section from "./section1";
 import "../index.css"
+import { api } from "../api";
 
 import { useState, useEffect, useRef } from 'react';
 
@@ -27,14 +28,7 @@ function HomePage() {
 
     const fetch_stats = async (client_ip) => {
         try {
-            const response = await fetch(
-                `${process.env.REACT_APP_API_URL}/session/stats?client_ip=${client_ip}`,
-                {
-                    method: "GET",
-                }
-            );
-
-            const data = await response.json();
+            const data = await api.getStats(client_ip);
             settotal(data);
             console.log("stats :", data);
         } catch (err) {
@@ -46,31 +40,18 @@ function HomePage() {
 
     const createSession = async (user_number, user_ip, startTime) => {
         try {
-            const response = await fetch(`${process.env.REACT_APP_API_URL}/session/session_create`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    user_number: user_number,
-                    user_ip: user_ip,
-                    start_time: startTime
-                })
+            const data = await api.createSession({
+                user_number: user_number,
+                user_ip: user_ip,
+                start_time: startTime
             });
-
-            const data = await response.json();
-
-            if (response.ok) {
-                setUser(prev => ({
-                    ...prev,
-                    session_id: data.session_id
-                }));
-                console.log("Session created:", data.session_id);
-            } else {
-                console.error("세션 생성 실패:", data);
-            }
+            setUser(prev => ({
+                ...prev,
+                session_id: data.session_id
+            }));
+            console.log("Session created:", data.session_id);
         } catch (err) {
-            console.error("서버 요청 오류:", err);
+            console.error("세션 생성 실패:", err);
         }
     };
 
@@ -83,10 +64,8 @@ function HomePage() {
         const randomNum = Math.floor(1000 + Math.random() * 9000);
 
         // 2) 사용자 IP 가져오기
-        fetch("https://api.ipify.org?format=json")
-            .then((res) => res.json())
-            .then((data) => {
-                const ip = data.ip;
+        api.getClientIp()
+            .then((ip) => {
                 const startTime = new Date().toISOString();
 
                 setUser({

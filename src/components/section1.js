@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
 import * as faceapi from "@vladmandic/face-api";
+import { api } from "../api";
 
 
 export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user, ScrollWrap }) {
@@ -238,27 +239,15 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user,
         }, 200); // 0.2초 정도면 충분
 
         try {
-            const response = await fetch(`${process.env.REACT_APP_API_URL}/content_interactions/create_content_data`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    session_id: user.session_id,
-                    recommended_emotion: emotionName,
-                    content_type: actualEmotionContent[emotionName].type,
-                    content_title: actualEmotionContent[emotionName].title,
-                    viewing_completed: true,
-                    stopped_early: true,
-                })
+            const data = await api.createContentData({
+                session_id: user.session_id,
+                recommended_emotion: emotionName,
+                content_type: actualEmotionContent[emotionName].type,
+                content_title: actualEmotionContent[emotionName].title,
+                viewing_completed: true,
+                stopped_early: true,
             });
-
-            const data = await response.json();
-            if (response.ok) {
-                console.log("Session created:", data.session_id);
-            } else {
-                console.error("세션 생성 실패:", data);
-            }
+            console.log("콘텐츠 기록 완료:", data);
         } catch (err) {
             console.error("서버 요청 오류:", err);
         }
@@ -885,42 +874,15 @@ export default function Section1({ PuzzleStatus, setPuzzleStatus, setUser, user,
 
     const create_emotion_data = async (index) => {
         try {
-            if (index === 3) {
-                const response = await fetch(`${process.env.REACT_APP_API_URL}/emotion_measurements/create_emotion_data`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        session_id: user.session_id,
-                        measurement_type: "primary",
-                        emotion_name: firstEmotionDisplay.currentEmotionName,
-                        confidence_score: firstEmotionDisplay.confidence,
-                        face_detection_success: true
-                    })
-                });
-                const data = await response.json();
-                if (!response.ok) throw new Error(data.message || "서버 에러");
-                console.log("생성된 데이터:", data.measurement_id);
-            } else {
-                const response = await fetch(`${process.env.REACT_APP_API_URL}/emotion_measurements/create_emotion_data`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        session_id: user.session_id,
-                        measurement_type: "secondary",
-                        emotion_name: SecondEmotionDisplay.currentEmotionName,
-                        confidence_score: SecondEmotionDisplay.confidence,
-                        face_detection_success: true
-                    })
-                });
-                const data = await response.json();
-                if (!response.ok) throw new Error(data.message || "서버 에러");
-                console.log("생성된 데이터:", data.measurement_id);
-            }
-
-
-
-
-
+            const display = index === 3 ? firstEmotionDisplay : SecondEmotionDisplay;
+            const data = await api.createEmotionData({
+                session_id: user.session_id,
+                measurement_type: index === 3 ? "primary" : "secondary",
+                emotion_name: display.currentEmotionName,
+                confidence_score: display.confidence,
+                face_detection_success: true
+            });
+            console.log("생성된 데이터:", data.measurement_id);
         } catch (err) {
             console.error("오류 발생:", err);
         }
@@ -1760,27 +1722,15 @@ async function create_kpi_data({ user }) {
     }
 
     try {
-        const response = await fetch(`${process.env.REACT_APP_API_URL}/performance_metrics/create_metrics_dtaa`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                session_id: user.session_id,
-                face_detection_accuracy: metrics.detection_score,
-                emotion_confidence_avg: metrics.confidence_score,
-                valid_measurement_rate: metrics.validity_rate,
-                processing_time: metrics.processing_time,
-                api_success_rate: metrics.api_success_rate
-            })
+        const data = await api.createMetricsData({
+            session_id: user.session_id,
+            face_detection_accuracy: metrics.detection_score,
+            emotion_confidence_avg: metrics.confidence_score,
+            valid_measurement_rate: metrics.validity_rate,
+            processing_time: metrics.processing_time,
+            api_success_rate: metrics.api_success_rate
         });
-
-        const data = await response.json();
-        if (response.ok) {
-            console.log("metrics created:", data.metric_id);
-        } else {
-            console.error("세션 생성 실패:", data);
-        }
+        console.log("metrics created:", data.metric_id);
     } catch (err) {
         console.error("서버 요청 오류:", err);
     }
@@ -1792,23 +1742,11 @@ async function add_session_end_time(user) {
     const end_time = new Date().toISOString();
 
     try {
-        const response = await fetch(`${process.env.REACT_APP_API_URL}/session/session_end`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                session_id: user.session_id,
-                end_time: end_time
-            })
+        const data = await api.endSession({
+            session_id: user.session_id,
+            end_time: end_time
         });
-
-        const data = await response.json();
-        if (response.ok) {
-            console.log("세션 수정 완료:", data.message);
-        } else {
-            console.error("세션 수정 실패:", data);
-        }
+        console.log("세션 수정 완료:", data.message);
     } catch (err) {
         console.error("서버 요청 오류:", err);
     }
