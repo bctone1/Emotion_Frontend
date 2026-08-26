@@ -15,6 +15,32 @@ REACT_APP_USE_MOCK=true npm run build   # 또는: cp .env.demo .env && npm run b
 
 `build/` 폴더를 정적 서버에 올리면 됩니다. SPA이므로 `/admin` 직접 접근을 위해 모든 경로를 `index.html`로 fallback 하도록 설정하세요.
 
+## 운영 서버 실행 (7003 포트)
+
+```bash
+cp .env.demo .env        # REACT_APP_USE_MOCK=true, PORT=7003
+npm install
+npm run build
+npm run serve            # npx serve -s build -l 7003  (SPA fallback 포함)
+```
+
+- 개발 서버로 띄우려면 `npm start` (PORT=7003, .env 값 사용).
+- **웹캠은 HTTPS에서만 동작**합니다 (`getUserMedia` 보안 제약). `http://host:7003`로 직접 접속하면 카메라 단계에서 실패하므로
+  nginx 등 리버스 프록시에서 TLS를 종단하고 7003으로 넘기세요. 예:
+
+```nginx
+server {
+    listen 443 ssl;
+    server_name demo.example.com;
+    # ssl_certificate / ssl_certificate_key ...
+    location / {
+        proxy_pass http://127.0.0.1:7003;
+        proxy_set_header Host $host;
+    }
+}
+```
+- 앱은 도메인 루트(`/`)에 배치되어야 합니다. 정적 자산 경로가 `/video/...`, `/이모션 로고-Photoroom.png` 처럼 루트 기준이라 서브 경로(`/demo/`) 배포 시 `package.json`에 `homepage` 설정과 경로 수정이 필요합니다.
+
 ## 실제 백엔드로 전환
 
 ```

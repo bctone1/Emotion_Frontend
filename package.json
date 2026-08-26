@@ -16,9 +16,10 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "PORT=3003 react-scripts start",
-    "start:win": "set PORT=3003 && react-scripts start",
+    "start": "PORT=7003 react-scripts start",
+    "start:win": "set PORT=7003 && react-scripts start",
     "build": "react-scripts build",
+    "serve": "npx serve -s build -l 7003",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
